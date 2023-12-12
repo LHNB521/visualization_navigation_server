@@ -9,6 +9,7 @@ import {SharedModule} from './shared/shared.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    // 共享数据库+Redis模块
     SharedModule
   ],
 })

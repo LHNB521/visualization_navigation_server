@@ -1,7 +1,6 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SharedService } from './shared.service';
 import { RedisService } from './redis.service';
 import { createClient } from 'redis';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -28,7 +27,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
     })
   ],
   providers: [
-    SharedService,
     RedisService,
     {
       inject: [ConfigService],
@@ -60,6 +58,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
       }),
     }
   ],
-  exports: [SharedService, RedisService],
+  exports: [ RedisService],
 })
 export class SharedModule { }
