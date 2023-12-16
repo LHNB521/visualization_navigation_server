@@ -9,19 +9,18 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    // PassportModule,
-    // JwtModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: async (configService: ConfigService) => {
-    //     console.log(configService.get('JWT_SECRET'))
-    //     return {
-    //       secret: process.env.JWT_SECRET || configService.get('JWT_SECRET'),
-    //     }
-    //   }
-    // })
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: process.env.JWT_SECRET || configService.get('JWT_SECRET'),
+        }
+      }
+    })
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, LocalStrategy],
 })
 export class AuthModule { }

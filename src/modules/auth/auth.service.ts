@@ -11,21 +11,22 @@ import { ACCESS_TOKEN_EXPIRATION_TIME, USER_ACCESS_TOKEN_KEY } from '@/constants
 @Injectable()
 export class AuthService {
   constructor(
-    // private userService: UserService,
+    private userService: UserService,
     // private jwtService: JwtService,
     // private redisService: RedisService,
     // private configService: ConfigService,
   ) { }
 
   // 验证用户
-  // async validateUser(username: string, password: string): Promise<any> {
-  //   const user = await this.userService.findByUsername(username);
-  //   if (user && compareSync(password, user.password)) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
+  async validateUser(username: string, password: string): Promise<any> {
+    // const user = await this.userService.findByUsername(username);
+    console.log('验证用户','user');
+    // if (user && compareSync(password, user.password)) {
+    //   const { password, ...result } = user;
+    //   return result;
+    // }
+    // return null;
+  }
 
   // 登录
   async login(user: any, captcha?: string) {
