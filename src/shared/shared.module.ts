@@ -13,17 +13,33 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        autoLoadEntities: true,
-        host: configService.get('POSTGRES_HOST'),
-        port: configService.get('POSTGRES_PORT'),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DATABASE'),
-        syncronize: process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
-        timezone: '+08:00',
-      })
+      useFactory: (configService: ConfigService) => {
+        if (configService.get('SQL_TYPE') === 'mysql') {
+          return {
+            type: 'mysql',
+            autoLoadEntities: true,
+            host: process.env.DB_HOST || configService.get('DB_HOST'),
+            port: +process.env.DB_PORT || configService.get('DB_PORT'),
+            username: process.env.DB_USER || configService.get('DB_USER'),
+            password: process.env.DB_PWD || configService.get('DB_PWD'),
+            database: process.env.DB_DATABASE || configService.get('DB_DATABASE'),
+            synchronize: process.env.NODE_ENV === 'production' ? false : configService.get('DB_SYNC'),
+            timezone: '+08:00',
+          }
+        } else {
+          return {
+            type: 'postgres',
+            autoLoadEntities: true,
+            host: configService.get('POSTGRES_HOST'),
+            port: configService.get('POSTGRES_PORT'),
+            username: configService.get('POSTGRES_USER'),
+            password: configService.get('POSTGRES_PASSWORD'),
+            database: configService.get('POSTGRES_DATABASE'),
+            syncronize: process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
+            timezone: '+08:00',
+          }
+        }
+      }
     })
   ],
   providers: [
@@ -31,7 +47,7 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
     {
       inject: [ConfigService],
       provide: 'REDIS_CLIENT',
-      async useFactory(configService: ConfigService){
+      async useFactory(configService: ConfigService) {
         const client = createClient({
           url: configService.get('REDIS_URL'),
         });
@@ -58,6 +74,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
       }),
     }
   ],
-  exports: [ RedisService],
+  exports: [RedisService],
 })
 export class SharedModule { }

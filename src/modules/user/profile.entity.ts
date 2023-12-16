@@ -25,12 +25,12 @@ export class Profile {
   @Column({ nullable: true })
   email: string;
 
-  @OneToOne(() => User, (user) => user.profile, {
-    createForeignKeyConstraints: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
-  user: User;
+  // @OneToOne(() => User, (user) => user.profile, {
+  //   createForeignKeyConstraints: false,
+  //   onDelete: 'CASCADE',
+  // })
+  // @JoinColumn()
+  // user: User;
 
   @Column({ unique: true })
   userId: number;
