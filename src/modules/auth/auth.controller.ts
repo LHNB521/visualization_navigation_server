@@ -19,14 +19,13 @@ export class AuthController {
     // 预览模式下，直接登录
     if(this.configService.get('IS_PREVIEW') === 'true' && body.isQuick){
       console.log('预览模式')
-      // return this.authService.login(req.user,req.session?.code)
+      return this.authService.login(req.user,req.session?.code)
     }
 
     // 验证码校验
     // if(req.session?.code?.toLocaleLowerCase()!== body.captcha?.toLocaleLowerCase()){
     //   throw new CustomException(ErrorCode.ERR_10003)
     // }
-    console.log(req.user,req.session?.code)
-    // return this.authService.login(req.user,req.session?.code)
+    return this.authService.login(req.user,req.session?.code)
   }
 }
