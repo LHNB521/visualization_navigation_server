@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import {SharedModule} from './shared/shared.module';
+import {SharedModule} from '@/shared/shared.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -10,7 +11,9 @@ import {SharedModule} from './shared/shared.module';
       envFilePath: '.env',
     }),
     // 共享数据库+Redis模块
-    SharedModule
+    SharedModule,
+
+    AuthModule
   ],
 })
 export class AppModule {}
