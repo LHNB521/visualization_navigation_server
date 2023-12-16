@@ -16,10 +16,10 @@ export class Role {
   @Column({ default: true })
   enable: boolean;
 
-  // @ManyToMany(() => User, (user) => user.roles, {
-  //   createForeignKeyConstraints: false,
-  // })
-  // users: User[];
+  @ManyToMany(() => User, (user) => user.roles, {
+    createForeignKeyConstraints: false,
+  })
+  users: User[];
 
   @ManyToMany(() => Permission, (permission) => permission.roles, {
     createForeignKeyConstraints: false,

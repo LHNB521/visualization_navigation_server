@@ -7,19 +7,18 @@ import { User } from './user.entity';
 @Injectable()
 export class UserService {
   constructor(
-    // @InjectRepository(User)
-    // private userRep: Repository<User>
+    @InjectRepository(User)
+    private userRep: Repository<User>
   ) { }
 
   async findByUsername(username: string) {
-    console.log(username)
-    // return this.userRep.findOne({
-    //   where: { username },
-    //   select: ['id', 'username', 'password', 'enable'],
-    //   relations: {
-    //     profile: true,
-    //     roles: true
-    //   }
-    // })
+    return this.userRep.findOne({
+      where: { username },
+      select: ['id', 'username', 'password', 'enable'],
+      relations: {
+        profile: true,
+        roles: true
+      }
+    })
   }
 }

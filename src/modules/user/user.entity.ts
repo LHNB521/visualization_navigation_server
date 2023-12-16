@@ -8,8 +8,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-// import { Profile } from './profile.entity';
-// import { Role } from '@/modules/role/role.entity';
+import { Profile } from './profile.entity';
+import { Role } from '@/modules/role/role.entity';
 
 
 @Entity()
@@ -32,15 +32,15 @@ export class User {
   @UpdateDateColumn()
   updateTime: Date;
 
-  // @OneToOne(() => Profile, (profile) => profile.user, {
-  //   createForeignKeyConstraints: false,
-  //   cascade: true
-  // })
-  // profile: Profile;
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    createForeignKeyConstraints: false,
+    cascade: true
+  })
+  profile: Profile;
 
-  // @ManyToMany(() => Role, (role) => role.users, {
-  //   createForeignKeyConstraints: false,
-  // })
-  // @JoinTable()
-  // roles: Role[];
+  @ManyToMany(() => Role, (role) => role.users, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinTable()
+  roles: Role[];
 }

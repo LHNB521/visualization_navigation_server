@@ -20,10 +20,10 @@ export class AuthService {
   // 验证用户
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.findByUsername(username);
-    // if (user && compareSync(password, user.password)) {
-    //   const { password, ...result } = user;
-    //   return result;
-    // }
+    if (user && compareSync(password, user.password)) {
+      const { password, ...result } = user;
+      return result;
+    }
     return null;
   }
 

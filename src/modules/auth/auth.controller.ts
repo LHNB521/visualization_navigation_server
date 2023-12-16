@@ -26,7 +26,7 @@ export class AuthController {
     // if(req.session?.code?.toLocaleLowerCase()!== body.captcha?.toLocaleLowerCase()){
     //   throw new CustomException(ErrorCode.ERR_10003)
     // }
-    console.log(req.session, body)
+    console.log(req.user,req.session?.code)
     // return this.authService.login(req.user,req.session?.code)
   }
 }
