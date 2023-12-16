@@ -16,9 +16,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       error: exception.name,
       message: exceptionResponse?.message || exception.message,
       originUrl: request.originalUrl,
-      timestamp: new Date().toISOString(),
-      path: request.url,
     });
-
   }
 }
