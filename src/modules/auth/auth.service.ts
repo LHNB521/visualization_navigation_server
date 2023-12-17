@@ -57,10 +57,17 @@ export class AuthService {
       accessToken,
     };
   }
-
   // 获取token的key
   getAccessTokenKey(payload: any) {
     return `${USER_ACCESS_TOKEN_KEY}:${payload.userId}${payload.captcha ? ':' + payload.captcha : ''}`;
+  }
+
+  async logout(user:any){
+    if(user.userId){
+      await Promise.all([this.redisService.del(this.getAccessTokenKey({user}))])
+      return true
+    }
+    return false
   }
 
 }
