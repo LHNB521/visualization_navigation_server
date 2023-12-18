@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from "@/modules/user/user.service";
-import { compareSync } from 'bcrypt';
+import { compareSync } from 'bcryptjs';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import { ConfigService } from "@nestjs/config";
 import { RedisService } from "@/shared/redis.service";

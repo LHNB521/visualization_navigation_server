@@ -1,73 +1,51 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+### 后端
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+#### 本地构建
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ npm install
+```
+pnpm build
 ```
 
-## Running the app
+> 注意: 构建后会生成两个文件夹 `dist` 和 `ncc-dist`, 我们只需要 `ncc-dist`，因为 `dist` 下的文件会依赖于 `node_modules` 部署起来会比较麻烦，而 `ncc-dist` 下的文件则将所需要的依赖文件都打包到一起了，只需要执行 里里面的 `index.js` 就可以运行了
 
-```bash
-# development
-$ npm run start
+#### 本地预览
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+node ncc-dist/index.js
 ```
 
-## Test
+看到 `🚀 启动成功: http://localhost:8765` 就成功了
 
-```bash
-# unit tests
-$ npm run test
+#### 部署
 
-# e2e tests
-$ npm run test:e2e
+部署到云服务器或者自建的服务器中
 
-# test coverage
-$ npm run test:cov
+一、服务器环境准备:
+
+1.  mysql(推荐5.7)
+2.  redis
+3.  node (推荐安装nvm)
+4.  pm2，使用 `npm i -g pm2` 进行安装
+
+二、将构建产物上传到云服务器，然后在 `index.js` 同级目录下创建 `.env` 文件
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=admin
+DB_PWD=123456
+DB_DATABASE=vis
+DB_SYNC=true
+JWT_SECRET="xxxxxx"
+IS_PREVIEW=false
 ```
 
-## Support
+> 注: 需将以上配置修改为服务器环境的配置
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+三、使用 `pm2` 启动服务
 
-## Stay in touch
+```
+pm2 start -n nest-jwt ./index.js --watch
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+> 注: 执行 `pm2 ls` 可查看运行的服务
