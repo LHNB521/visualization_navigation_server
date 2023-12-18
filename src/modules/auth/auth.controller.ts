@@ -31,13 +31,17 @@ export class AuthController {
   // 获取验证码
   @Get('captcha')
   async createCaptcha(@Req() req: any, @Res() res: any) {
-    const captcha = svgCaptcha.create({
+    const captcha = svgCaptcha.createMathExpr({
       size: 4,
-      fontSize: 40,
+      fontSize: 50,
       width: 80,
-      height: 40,
+      height: 50,
       background: '#fff',
       color: true,
+      // 数字的时候，设置下面属性。最大，最小，加或者减
+      mathMin: 0,
+      mathMax: 9,
+      mathOperator: "+"
     });
     req.session.code = captcha.text || '';
     res.type('image/svg+xml');
