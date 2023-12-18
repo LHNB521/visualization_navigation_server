@@ -15,7 +15,7 @@ async function bootstrap() {
       saveUninitialized: true,
     })
   )
-  await app.listen(3000);
-  console.log('🚀 启动成功: http://localhost:3000');
+  await app.listen(8765);
+  console.log('🚀 启动成功: http://localhost:8765');
 }
 bootstrap();
