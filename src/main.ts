@@ -16,6 +16,6 @@ async function bootstrap() {
     })
   )
   await app.listen(8765);
-  console.log('🚀 启动成功: http://localhost:8765');
+  console.log('🚀 启动成功: http://0.0.0.0:8765');
 }
 bootstrap();

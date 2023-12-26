@@ -1,15 +1,17 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { JwtGuard, LocalGuard } from '@/common/guards';
+import { JwtGuard, LocalGuard, PreviewGuard } from '@/common/guards';
 import { AuthService } from "./auth.service";
 import { CustomException, ErrorCode } from "@/common/exceptions/custom.exception";
 import * as svgCaptcha from 'svg-captcha';
+import { ChangePasswordDto } from './dto'
+import { UserService } from '@/modules/user/user.service';
 
 @Controller('auth') // @Controller()装饰器，这是必需的，用于定义一个基本的控制器, ip:3000/auth/...
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    // private userService: UserService,
+    private userService: UserService,
     private configService: ConfigService,
   ) { }
 
@@ -38,7 +40,6 @@ export class AuthController {
       height: 50,
       background: '#fff',
       color: true,
-      // 数字的时候，设置下面属性。最大，最小，加或者减
       mathMin: 0,
       mathMax: 9,
       mathOperator: "+"
@@ -55,6 +56,20 @@ export class AuthController {
     return this.authService.logout(req.user);
   }
 
-
+  // 修改密码
+  @Post('password')
+  @UseGuards(JwtGuard, PreviewGuard)
+  async changePassword(@Req() req: any, @Body() body: ChangePasswordDto) {
+    console.log(req.user, body)
+    const ret = await this.authService.validateUser(req.user.username, body.oldPassword)
+    if (!ret) {
+      throw new CustomException(ErrorCode.ERR_10004)
+    }
+    // 修改密码
+    await this.userService.resetPassword(req.user.id, body.newPassword)
+    // 修改密码后退出登录
+    await this.authService.logout(req.user)
+    return true
+  }
 
 }

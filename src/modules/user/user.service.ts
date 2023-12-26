@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { hashSync } from "bcryptjs";
 
 
 @Injectable()
@@ -20,5 +21,11 @@ export class UserService {
         roles: true
       }
     })
+  }
+  async resetPassword(id: number, password: string) {
+    const user = await this.userRep.findOne({ where: { id } })
+    user.password = hashSync(password)
+    await this.userRep.save(user)
+    return true
   }
 }
