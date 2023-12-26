@@ -18,6 +18,9 @@ export class User {
   id: number;
 
   @Column({ unique: true, length: 50 })
+  nickname: string;
+
+  @Column({ unique: true, length: 50 })
   username: string;
 
   @Column({ select: false })

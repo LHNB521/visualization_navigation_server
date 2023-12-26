@@ -30,10 +30,10 @@ export class AuthService {
   // 登录
   async login(user: any, captcha?: string) {
     // 判断用户是否有enable属性为true的角色
-    if (!user.roles?.some((item) => item.enable)) {
+    if (!user.roles?.some((item: any) => item.enable)) {
       throw new CustomException(ErrorCode.ERR_11003);
     }
-    const roleCodes = user.roles?.map((item) => item.code);
+    const roleCodes = user.roles?.map((item: any) => item.code);
     const currentRole = user.roles[0]
     const payload = {
       userId: user.id,

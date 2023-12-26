@@ -20,7 +20,6 @@ export class AuthController {
   async login(@Req() req: any, @Body() body: any) {
     // 预览模式下，直接登录
     if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
-      console.log('预览模式')
       return this.authService.login(req.user, req.session?.code)
     }
     // 验证码校验
@@ -60,7 +59,6 @@ export class AuthController {
   @Post('password')
   @UseGuards(JwtGuard, PreviewGuard)
   async changePassword(@Req() req: any, @Body() body: ChangePasswordDto) {
-    console.log(req.user, body)
     const ret = await this.authService.validateUser(req.user.username, body.oldPassword)
     if (!ret) {
       throw new CustomException(ErrorCode.ERR_10004)
