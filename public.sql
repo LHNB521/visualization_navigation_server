@@ -1,20 +1,44 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 43.140.251.66
+ Source Server         : 192.168.1.2
  Source Server Type    : PostgreSQL
- Source Server Version : 140002
- Source Host           : 43.140.251.66:5432
+ Source Server Version : 120012
+ Source Host           : 192.168.1.2:5432
  Source Catalog        : vis
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 140002
+ Target Server Version : 120012
  File Encoding         : 65001
 
- Date: 18/12/2023 09:12:16
+ Date: 03/01/2024 10:38:17
 */
 
+
+-- ----------------------------
+-- Sequence structure for profile_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."profile_seq";
+CREATE SEQUENCE "public"."profile_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 99999999999
+START 1
+CACHE 1;
+COMMENT ON SEQUENCE "public"."profile_seq" IS 'profile表id自增';
+
+-- ----------------------------
+-- Sequence structure for user_seq
+-- ----------------------------
+DROP SEQUENCE IF EXISTS "public"."user_seq";
+CREATE SEQUENCE "public"."user_seq" 
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 9223372036854775807
+START 1
+CACHE 1;
+COMMENT ON SEQUENCE "public"."user_seq" IS 'user表id自增';
 
 -- ----------------------------
 -- Table structure for permission
@@ -50,7 +74,7 @@ COMMENT ON COLUMN "public"."permission"."show" IS '是否展示在页面菜单';
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."profile";
 CREATE TABLE "public"."profile" (
-  "id" int4 NOT NULL,
+  "id" int4 NOT NULL DEFAULT nextval('profile_seq'::regclass),
   "gender" int4,
   "avatar" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "address" varchar(255) COLLATE "pg_catalog"."default",
@@ -112,12 +136,12 @@ INSERT INTO "public"."role_permissions_permission" VALUES (2, 15);
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."user";
 CREATE TABLE "public"."user" (
-  "id" int4 NOT NULL,
+  "id" int4 NOT NULL DEFAULT nextval('user_seq'::regclass),
   "username" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
   "password" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "enable" int2 NOT NULL,
-  "createTime" timestamp(6) NOT NULL,
-  "updateTime" timestamp(6) NOT NULL
+  "createTime" timestamp(6) NOT NULL DEFAULT NULL::timestamp without time zone,
+  "updateTime" timestamp(6) NOT NULL DEFAULT NULL::timestamp without time zone
 )
 ;
 
@@ -141,6 +165,106 @@ CREATE TABLE "public"."user_roles_role" (
 -- ----------------------------
 INSERT INTO "public"."user_roles_role" VALUES (1, 1);
 INSERT INTO "public"."user_roles_role" VALUES (1, 2);
+
+-- ----------------------------
+-- Function structure for uuid_generate_v1
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_generate_v1"();
+CREATE OR REPLACE FUNCTION "public"."uuid_generate_v1"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_generate_v1'
+  LANGUAGE c VOLATILE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_generate_v1mc
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_generate_v1mc"();
+CREATE OR REPLACE FUNCTION "public"."uuid_generate_v1mc"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_generate_v1mc'
+  LANGUAGE c VOLATILE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_generate_v3
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_generate_v3"("namespace" uuid, "name" text);
+CREATE OR REPLACE FUNCTION "public"."uuid_generate_v3"("namespace" uuid, "name" text)
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_generate_v3'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_generate_v4
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_generate_v4"();
+CREATE OR REPLACE FUNCTION "public"."uuid_generate_v4"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_generate_v4'
+  LANGUAGE c VOLATILE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_generate_v5
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_generate_v5"("namespace" uuid, "name" text);
+CREATE OR REPLACE FUNCTION "public"."uuid_generate_v5"("namespace" uuid, "name" text)
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_generate_v5'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_nil
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_nil"();
+CREATE OR REPLACE FUNCTION "public"."uuid_nil"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_nil'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_ns_dns
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_ns_dns"();
+CREATE OR REPLACE FUNCTION "public"."uuid_ns_dns"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_ns_dns'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_ns_oid
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_ns_oid"();
+CREATE OR REPLACE FUNCTION "public"."uuid_ns_oid"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_ns_oid'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_ns_url
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_ns_url"();
+CREATE OR REPLACE FUNCTION "public"."uuid_ns_url"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_ns_url'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Function structure for uuid_ns_x500
+-- ----------------------------
+DROP FUNCTION IF EXISTS "public"."uuid_ns_x500"();
+CREATE OR REPLACE FUNCTION "public"."uuid_ns_x500"()
+  RETURNS "pg_catalog"."uuid" AS '$libdir/uuid-ossp', 'uuid_ns_x500'
+  LANGUAGE c IMMUTABLE STRICT
+  COST 1;
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"public"."profile_seq"', 1, true);
+
+-- ----------------------------
+-- Alter sequences owned by
+-- ----------------------------
+SELECT setval('"public"."user_seq"', 5, true);
 
 -- ----------------------------
 -- Indexes structure for table permission
