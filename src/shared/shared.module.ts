@@ -36,6 +36,7 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
             password: configService.get('POSTGRES_PASSWORD'),
             database: configService.get('POSTGRES_DATABASE'),
             syncronize: process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
+            logging: true,
             timezone: '+08:00',
           }
         }

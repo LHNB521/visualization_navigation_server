@@ -1,17 +1,53 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, Like } from 'typeorm';
+import { In, Repository, Like } from 'typeorm';
 import { User } from './user.entity';
 import { hashSync } from "bcryptjs";
-import { GetUserDto } from "./dto";
+import { GetUserDto, CreateUserDto } from "./dto";
+import { CustomException, ErrorCode } from "@/common/exceptions/custom.exception";
+import { Role } from "../role/role.entity";
+import { Profile } from "./profile.entity";
 
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRep: Repository<User>
+    private userRep: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepo: Repository<Role>,
+    @InjectRepository(Profile)
+    private profileRep: Repository<Profile>,
   ) { }
+
+  // 创建用户
+  async create(user: CreateUserDto) {
+    const { username } = user
+    console.log(user, CreateUserDto)
+    const existUser = await this.findByUsername(username)
+    // 判断用户是否存在
+    if (existUser) {
+      throw new CustomException(ErrorCode.ERR_10001)
+    }
+
+    const newUser = this.userRep.create(user)
+    // 判断角色是否存在
+    if (user.roleIds !== undefined) {
+      newUser.roles = await this.roleRepo.find({
+        where: { id: In(user.roleIds) }
+      })
+    }
+
+    if(!newUser.profile){
+      newUser.profile = this.profileRep.create()
+    }
+
+    newUser.password = hashSync(newUser.password)
+    await this.userRep.save(newUser)
+    
+    console.log(newUser)
+    return true
+  }
 
   // 根据查询所有用户信息
   async findAll(query: GetUserDto) {
