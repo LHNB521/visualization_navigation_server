@@ -23,7 +23,6 @@ export class UserService {
   // 创建用户
   async create(user: CreateUserDto) {
     const { username } = user
-    console.log(user, CreateUserDto)
     const existUser = await this.findByUsername(username)
     // 判断用户是否存在
     if (existUser) {
@@ -45,7 +44,6 @@ export class UserService {
     newUser.password = hashSync(newUser.password)
     await this.userRep.save(newUser)
     
-    console.log(newUser)
     return true
   }
 

@@ -12,7 +12,7 @@
  Target Server Version : 120012
  File Encoding         : 65001
 
- Date: 03/01/2024 10:38:17
+ Date: 05/01/2024 14:22:44
 */
 
 
@@ -87,6 +87,7 @@ CREATE TABLE "public"."profile" (
 -- ----------------------------
 -- Records of profile
 -- ----------------------------
+INSERT INTO "public"."profile" VALUES (5, 0, '', '', '', 19, '李浩');
 
 -- ----------------------------
 -- Table structure for role
@@ -139,9 +140,9 @@ CREATE TABLE "public"."user" (
   "id" int4 NOT NULL DEFAULT nextval('user_seq'::regclass),
   "username" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
   "password" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "enable" int2 NOT NULL,
-  "createTime" timestamp(6) NOT NULL DEFAULT NULL::timestamp without time zone,
-  "updateTime" timestamp(6) NOT NULL DEFAULT NULL::timestamp without time zone
+  "enable" int2 NOT NULL DEFAULT 1,
+  "createTime" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updateTime" timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 ;
 
@@ -149,6 +150,7 @@ CREATE TABLE "public"."user" (
 -- Records of user
 -- ----------------------------
 INSERT INTO "public"."user" VALUES (1, 'admin', '$2a$10$FsAafxTTVVGXfIkJqvaiV.1vPfq4V9HW298McPldJgO829PR52a56', 1, '2023-11-18 16:18:59.150632', '2023-11-18 16:18:59.150632');
+INSERT INTO "public"."user" VALUES (19, 'lh', '$2a$10$4/sNOr2qhMBDeN0TlGskA.A5qf.IKYlDPE8apdrGPTFrQLoM844/S', 1, '2024-01-05 06:18:52.028131', '2024-01-05 06:18:52.028131');
 
 -- ----------------------------
 -- Table structure for user_roles_role
@@ -259,12 +261,12 @@ CREATE OR REPLACE FUNCTION "public"."uuid_ns_x500"()
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."profile_seq"', 1, true);
+SELECT setval('"public"."profile_seq"', 5, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
-SELECT setval('"public"."user_seq"', 5, true);
+SELECT setval('"public"."user_seq"', 19, true);
 
 -- ----------------------------
 -- Indexes structure for table permission
