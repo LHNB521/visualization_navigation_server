@@ -37,14 +37,33 @@ export class UserService {
       })
     }
 
-    if(!newUser.profile){
+    if (!newUser.profile) {
       newUser.profile = this.profileRep.create()
     }
 
     newUser.password = hashSync(newUser.password)
     await this.userRep.save(newUser)
+
+    return true
+  }
+
+  // 删除用户
+  async remove(id: number) {
+    // 不能删除的用户
+    if (id == 1) throw new CustomException(ErrorCode.ERR_11006, '不能删除根用户')
+
+    // 删除用户表
+    await this.userRep.delete(id)
+
+    // 删除用户信息表
+    await this.profileRep
+      .createQueryBuilder('profile')
+      .delete()
+      .where('userId = :id', { id })
+      .execute()
     
     return true
+
   }
 
   // 根据查询所有用户信息

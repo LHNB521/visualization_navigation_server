@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
@@ -14,10 +14,24 @@ export class UserController {
   @Post('create')
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
-  addUser(@Body() user: CreateUserDto){
+  addUser(@Body() user: CreateUserDto) {
     return this.userService.create(user)
   }
-  
+
+  @Delete('delete/:id')
+  @UseGuards(PreviewGuard)
+  @Roles('SUPER_ADMIN')
+  deleteUser(@Param('id') id: number, @Request() req: any) {
+
+    const currentUser = req.user
+
+    if (currentUser.id === id) {
+      throw new CustomException(ErrorCode.ERR_11006, '非法操作，不能删除自己！');
+    }
+
+    return this.userService.remove(id);
+  }
+
   // 获取所有用户 
   @Get('list')
   getAllUsers(@Query() queryDto: GetUserDto) {
