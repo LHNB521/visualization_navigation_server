@@ -61,7 +61,7 @@ export class UserService {
       .delete()
       .where('userId = :id', { id })
       .execute()
-    
+
     return true
 
   }
@@ -108,6 +108,27 @@ export class UserService {
     return { pageData, total };
   }
 
+  // 根据用户id查询用户详情
+  async findUserDetail(id: number, roleCode: string) {
+    // 查询用户信息
+    const user = await this.userRep.findOne({
+      where: { id },
+      relations: {
+        profile: true,
+        roles: true,
+      },
+    })
+
+    // 查询当前用户角色
+    const currentRole = user.roles?.find((item) => item.code === roleCode && item.enable)
+
+    if (!currentRole) {
+      throw new CustomException(ErrorCode.ERR_11005, '您目前暂无此角色或已被禁用，请联系管理员')
+    }
+
+    return { ...user, currentRole }
+  }
+
   // 根据用户名查询用户信息 
   async findByUsername(username: string) {
     return this.userRep.findOne({
@@ -119,6 +140,8 @@ export class UserService {
       }
     })
   }
+
+
 
   // 重置密码
   async resetPassword(id: number, password: string) {

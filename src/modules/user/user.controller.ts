@@ -37,4 +37,11 @@ export class UserController {
   getAllUsers(@Query() queryDto: GetUserDto) {
     return this.userService.findAll(queryDto)
   }
+
+  // 获取当前登录用户详情
+  @Get('detail')
+  getUserInfor(@Request() req: any) {
+    const currentUser = req.user
+    return this.userService.findUserDetail(currentUser.userId, currentUser.currentRoleCode)
+  }
 }
