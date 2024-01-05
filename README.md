@@ -44,8 +44,22 @@ IS_PREVIEW=false
 
 三、使用 `pm2` 启动服务
 
+启动
+
 ```
 pm2 start -n nest-jwt ./index.js --watch
+```
+
+停止
+
+```
+pm2 stop nest-jwt
+```
+
+重启
+
+```
+pm2 restart nest-jwt
 ```
 
 > 注: 执行 `pm2 ls` 可查看运行的服务
