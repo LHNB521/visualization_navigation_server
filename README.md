@@ -49,3 +49,12 @@ pm2 start -n nest-jwt ./index.js --watch
 ```
 
 > 注: 执行 `pm2 ls` 可查看运行的服务
+
+四、常见问题
+
+'ncc' 不是内部或外部命令，也不是可运行的程序
+或批处理文件。
+
+```
+npm install -g @vercel/ncc
+```
