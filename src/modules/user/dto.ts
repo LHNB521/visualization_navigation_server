@@ -2,7 +2,7 @@ import { Allow, IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, Length } f
 
 export class Profile {
   @IsString()
-  @IsNotEmpty({message: '昵称不能为空'})
+  @IsNotEmpty({ message: '昵称不能为空' })
   @Length(2, 20, {
     message: `昵称长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`
   })
@@ -18,9 +18,9 @@ export class Profile {
   email?: string;
 }
 
-export class CreateUserDto{
+export class CreateUserDto {
   @IsString()
-  @IsNotEmpty({message: '用户名不能为空'})
+  @IsNotEmpty({ message: '用户名不能为空' })
   @Length(2, 20, {
     message: `用户名长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`
   })
@@ -61,4 +61,11 @@ export class GetUserDto {
 
   @Allow()
   enable?: boolean;
+}
+
+export class UpdatePasswordDto {
+  @IsString()
+  @IsNotEmpty({ message: '密码不能为空' })
+  @Length(6, 20, { message: `密码长度必须大于$constraint1到$constraint2之间` })
+  password: string;
 }
