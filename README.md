@@ -47,7 +47,7 @@ IS_PREVIEW=false
 启动
 
 ```
-pm2 start -n nest-jwt ./index.js --watch
+pm2 start ./index.js --name nest-jwt
 ```
 
 停止

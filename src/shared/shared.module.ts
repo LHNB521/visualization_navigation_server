@@ -18,11 +18,11 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
           return {
             type: 'mysql',
             autoLoadEntities: true,
-            host: process.env.DB_HOST || configService.get('DB_HOST'),
-            port: +process.env.DB_PORT || configService.get('DB_PORT'),
-            username: process.env.DB_USER || configService.get('DB_USER'),
-            password: process.env.DB_PWD || configService.get('DB_PWD'),
-            database: process.env.DB_DATABASE || configService.get('DB_DATABASE'),
+            host: configService.get('DB_HOST'),
+            port: configService.get('DB_PORT'),
+            username: configService.get('DB_USER'),
+            password: configService.get('DB_PWD'),
+            database: configService.get('DB_DATABASE'),
             synchronize: process.env.NODE_ENV === 'production' ? false : configService.get('DB_SYNC'),
             timezone: '+08:00',
           }
@@ -36,7 +36,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
             password: configService.get('POSTGRES_PASSWORD'),
             database: configService.get('POSTGRES_DATABASE'),
             syncronize: process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
-            // logging: true,
             timezone: '+08:00',
           }
         }
