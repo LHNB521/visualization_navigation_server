@@ -1,12 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from "@/modules/user/user.service";
+import { UserService } from '@/modules/user/user.service';
 import { compareSync } from 'bcryptjs';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
-import { ConfigService } from "@nestjs/config";
-import { RedisService } from "@/shared/redis.service";
+import { ConfigService } from '@nestjs/config';
+import { RedisService } from '@/shared/redis.service';
 import { ACCESS_TOKEN_EXPIRATION_TIME, USER_ACCESS_TOKEN_KEY } from '@/constants/redis.contant';
-
 
 @Injectable()
 export class AuthService {
@@ -15,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
     private redisService: RedisService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   // 验证用户
   async validateUser(username: string, password: string): Promise<any> {
@@ -34,13 +33,13 @@ export class AuthService {
       throw new CustomException(ErrorCode.ERR_11003);
     }
     const roleCodes = user.roles?.map((item: any) => item.code);
-    const currentRole = user.roles[0]
+    const currentRole = user.roles[0];
     const payload = {
       userId: user.id,
       username: user.username,
       roleCodes,
       currentRoleCode: currentRole.code,
-    }
+    };
     if (this.configService.get('IS_PREVIEW') === 'true') payload['captcha'] = captcha;
 
     return this.generateToken(payload);
@@ -51,7 +50,7 @@ export class AuthService {
     this.redisService.set(
       this.getAccessTokenKey(payload),
       accessToken,
-      ACCESS_TOKEN_EXPIRATION_TIME
+      ACCESS_TOKEN_EXPIRATION_TIME,
     );
     return {
       accessToken,
@@ -59,15 +58,16 @@ export class AuthService {
   }
   // 获取token的key
   getAccessTokenKey(payload: any) {
-    return `${USER_ACCESS_TOKEN_KEY}:${payload.userId}${payload.captcha ? ':' + payload.captcha : ''}`;
+    return `${USER_ACCESS_TOKEN_KEY}:${payload.userId}${
+      payload.captcha ? ':' + payload.captcha : ''
+    }`;
   }
 
-  async logout(user:any){
-    if(user.userId){
-      await Promise.all([this.redisService.del(this.getAccessTokenKey({user}))])
-      return true
+  async logout(user: any) {
+    if (user.userId) {
+      await Promise.all([this.redisService.del(this.getAccessTokenKey({ user }))]);
+      return true;
     }
-    return false
+    return false;
   }
-
 }

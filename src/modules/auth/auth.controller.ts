@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtGuard, LocalGuard, PreviewGuard } from '@/common/guards';
-import { AuthService } from "./auth.service";
-import { CustomException, ErrorCode } from "@/common/exceptions/custom.exception";
+import { AuthService } from './auth.service';
+import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import * as svgCaptcha from 'svg-captcha';
-import { ChangePasswordDto } from './dto'
+import { ChangePasswordDto } from './dto';
 import { UserService } from '@/modules/user/user.service';
 
 @Controller('auth') // @Controller()装饰器，这是必需的，用于定义一个基本的控制器, ip:3000/auth/...
@@ -13,20 +13,20 @@ export class AuthController {
     private readonly authService: AuthService,
     private userService: UserService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   @UseGuards(LocalGuard) //带上装饰器 @Injectable() 并实现了 CanActivate 接口的类，就是守卫。
   @Post('login')
   async login(@Req() req: any, @Body() body: any) {
     // 预览模式下，直接登录
     if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
-      return this.authService.login(req.user, req.session?.code)
+      return this.authService.login(req.user, req.session?.code);
     }
     // 验证码校验
     if (req.session?.code?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
-      throw new CustomException(ErrorCode.ERR_10003)
+      throw new CustomException(ErrorCode.ERR_10003);
     }
-    return this.authService.login(req.user, req.session?.code)
+    return this.authService.login(req.user, req.session?.code);
   }
 
   // 获取验证码
@@ -41,7 +41,7 @@ export class AuthController {
       color: true,
       mathMin: 0,
       mathMax: 9,
-      mathOperator: "+"
+      mathOperator: '+',
     });
     req.session.code = captcha.text || '';
     res.type('image/svg+xml');
@@ -59,15 +59,14 @@ export class AuthController {
   @Post('password')
   @UseGuards(JwtGuard, PreviewGuard)
   async changePassword(@Req() req: any, @Body() body: ChangePasswordDto) {
-    const ret = await this.authService.validateUser(req.user.username, body.oldPassword)
+    const ret = await this.authService.validateUser(req.user.username, body.oldPassword);
     if (!ret) {
-      throw new CustomException(ErrorCode.ERR_10004)
+      throw new CustomException(ErrorCode.ERR_10004);
     }
     // 修改密码
-    await this.userService.resetPassword(req.user.id, body.newPassword)
+    await this.userService.resetPassword(req.user.id, body.newPassword);
     // 修改密码后退出登录
-    await this.authService.logout(req.user)
-    return true
+    await this.authService.logout(req.user);
+    return true;
   }
-
 }

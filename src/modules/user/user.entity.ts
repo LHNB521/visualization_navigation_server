@@ -11,7 +11,6 @@ import {
 import { Profile } from './profile.entity';
 import { Role } from '@/modules/role/role.entity';
 
-
 @Entity('user')
 export class User {
   @PrimaryGeneratedColumn({ comment: '自增id主键' })
@@ -34,7 +33,7 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user, {
     createForeignKeyConstraints: false,
-    cascade: true
+    cascade: true,
   })
   profile: Profile;
 

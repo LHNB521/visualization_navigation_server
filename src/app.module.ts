@@ -16,7 +16,7 @@ import { PermissionModule } from '@/modules/permission/permission.module';
 
     PermissionModule,
     UserModule,
-    AuthModule
+    AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

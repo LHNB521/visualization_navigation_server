@@ -1,10 +1,18 @@
-import { Allow, IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, Length } from "class-validator";
+import {
+  Allow,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class Profile {
   @IsString()
   @IsNotEmpty({ message: '昵称不能为空' })
   @Length(2, 20, {
-    message: `昵称长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`
+    message: `昵称长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`,
   })
   nickName: string;
 
@@ -22,7 +30,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty({ message: '用户名不能为空' })
   @Length(2, 20, {
-    message: `用户名长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`
+    message: `用户名长度必须大于$constraint1到$constraint2之间，当前传递的值是$value`,
   })
   username: string;
 

@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import * as ErrorCode from './error-code';
 
-type ErrorType = (typeof ErrorCode)[keyof typeof ErrorCode]
+type ErrorType = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 function getErrorCode(errType: ErrorType): number {
-  const key = Object.keys(ErrorCode).find(key => ErrorCode[key] === errType);
+  const key = Object.keys(ErrorCode).find((key) => ErrorCode[key] === errType);
   return key ? +key.split('_')[1] : -1;
 }
 
@@ -16,4 +16,4 @@ export class CustomException extends HttpException {
     this.code = getErrorCode(errorCode);
   }
 }
-export { ErrorCode }
+export { ErrorCode };

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RedisClientType } from 'redis'
+import { RedisClientType } from 'redis';
 
 @Injectable()
 export class RedisService {
@@ -31,5 +31,4 @@ export class RedisService {
       await this.redisClient.expire(key, ttl);
     }
   }
-
 }
