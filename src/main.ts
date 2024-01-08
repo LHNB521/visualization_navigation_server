@@ -13,9 +13,10 @@ async function bootstrap() {
       cookie: { maxAge: null } as any,
       resave: false,
       saveUninitialized: true,
-    })
-  )
-  await app.listen(8765);
-  console.log('🚀 启动成功: http://0.0.0.0:8765');
+    }),
+  );
+  await app.listen(process.env.APP_PORT || 8765);
+
+  console.log(`🚀 启动成功: http://localhost:${process.env.APP_PORT}`);
 }
 bootstrap();

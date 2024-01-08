@@ -7,40 +7,26 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 
-
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        if (configService.get('SQL_TYPE') === 'mysql') {
-          return {
-            type: 'mysql',
-            autoLoadEntities: true,
-            host: configService.get('DB_HOST'),
-            port: configService.get('DB_PORT'),
-            username: configService.get('DB_USER'),
-            password: configService.get('DB_PWD'),
-            database: configService.get('DB_DATABASE'),
-            synchronize: process.env.NODE_ENV === 'production' ? false : configService.get('DB_SYNC'),
-            timezone: '+08:00',
-          }
-        } else {
-          return {
-            type: 'postgres',
-            autoLoadEntities: true,
-            host: configService.get('POSTGRES_HOST'),
-            port: configService.get('POSTGRES_PORT'),
-            username: configService.get('POSTGRES_USER'),
-            password: configService.get('POSTGRES_PASSWORD'),
-            database: configService.get('POSTGRES_DATABASE'),
-            syncronize: process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
-            timezone: '+08:00',
-          }
-        }
-      }
-    })
+        return {
+          type: 'postgres',
+          autoLoadEntities: true,
+          host: process.env.POSTGRES_HOST || configService.get('POSTGRES_HOST'),
+          port: +process.env.POSTGRES_PORT || configService.get('POSTGRES_PORT'),
+          username: process.env.POSTGRES_USER || configService.get('POSTGRES_USER'),
+          password: process.env.POSTGRES_PASSWORD || configService.get('POSTGRES_PASSWORD'),
+          database: process.env.POSTGRES_DATABASE || configService.get('POSTGRES_DATABASE'),
+          syncronize:
+            process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
+          timezone: '+08:00',
+        };
+      },
+    }),
   ],
   providers: [
     RedisService,
@@ -52,8 +38,8 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
           url: configService.get('REDIS_URL'),
         });
         await client.connect();
-        return client
-      }
+        return client;
+      },
     },
     {
       // 全局错误过滤器
@@ -72,8 +58,8 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
         whitelist: true,
         transform: true, // 自动类型转换
       }),
-    }
+    },
   ],
   exports: [RedisService],
 })
-export class SharedModule { }
+export class SharedModule {}
