@@ -15,8 +15,8 @@ async function bootstrap() {
       saveUninitialized: true,
     }),
   );
-  await app.listen(process.env.APP_PORT || 8765);
 
-  console.log(`🚀 启动成功: http://localhost:${process.env.APP_PORT}`);
+  await app.listen(8765);
+  console.log(`🚀 启动成功: http://localhost:8765`);
 }
 bootstrap();

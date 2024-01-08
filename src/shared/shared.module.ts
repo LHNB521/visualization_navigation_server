@@ -1,5 +1,5 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisService } from './redis.service';
 import { createClient } from 'redis';
@@ -13,17 +13,17 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        console.log(process.env.DB_HOST, configService.get('DB_HOST'));
         return {
           type: 'postgres',
           autoLoadEntities: true,
-          host: process.env.POSTGRES_HOST || configService.get('POSTGRES_HOST'),
-          port: +process.env.POSTGRES_PORT || configService.get('POSTGRES_PORT'),
-          username: process.env.POSTGRES_USER || configService.get('POSTGRES_USER'),
-          password: process.env.POSTGRES_PASSWORD || configService.get('POSTGRES_PASSWORD'),
-          database: process.env.POSTGRES_DATABASE || configService.get('POSTGRES_DATABASE'),
-          syncronize:
-            process.env.NODE_ENV === 'production' ? false : configService.get('POSTGRES_SYNC'),
-          timezone: '+08:00',
+          host: process.env.DB_HOST || configService.get('DB_HOST'),
+          port: +process.env.DB_PORT || configService.get('DB_PORT'),
+          username: process.env.DB_USERNAME || configService.get('DB_USERNAME'),
+          password: process.env.DB_PASSWORD || configService.get('DB_PASSWORD'),
+          database: process.env.DB_DATABASE || configService.get('DB_DATABASE'),
+          syncronize: configService.get('DB_SYNC'),
+          logging: process.env.NODE_ENV === 'development',
         };
       },
     }),
