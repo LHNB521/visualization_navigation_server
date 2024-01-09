@@ -1,5 +1,5 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisService } from './redis.service';
 import { createClient } from 'redis';
@@ -11,7 +11,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         console.log(process.env.DB_HOST, configService.get('DB_HOST'));
         return {
@@ -26,6 +25,7 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
           logging: process.env.NODE_ENV === 'development',
         };
       },
+      inject: [ConfigService],
     }),
   ],
   providers: [
