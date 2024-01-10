@@ -12,7 +12,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => {
-        console.log(process.env.DB_HOST, configService.get('DB_HOST'));
         return {
           type: 'postgres',
           autoLoadEntities: true,

@@ -75,6 +75,7 @@ export class UserService {
           avatar: true,
           email: true,
           address: true,
+          nickName: true,
         },
         roles: true,
       },
@@ -95,7 +96,7 @@ export class UserService {
       take: pageSize,
       skip: (pageNum - 1) * pageSize,
     });
-    const pageData = users.map((item: any) => {
+    const rows = users.map((item: any) => {
       const newItem = {
         ...item,
         ...item.profile,
@@ -103,7 +104,7 @@ export class UserService {
       delete newItem.profile;
       return newItem;
     });
-    return { pageData, total };
+    return { rows, total };
   }
 
   // 根据用户id查询用户详情
