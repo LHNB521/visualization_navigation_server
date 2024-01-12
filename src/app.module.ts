@@ -4,6 +4,7 @@ import { SharedModule } from '@/shared/shared.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { PermissionModule } from '@/modules/permission/permission.module';
+import { RoleModule } from '@/modules/role/role.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -26,6 +27,7 @@ import * as Joi from 'joi';
     // 共享数据库+Redis模块
     SharedModule,
 
+    RoleModule,
     PermissionModule,
     UserModule,
     AuthModule,
