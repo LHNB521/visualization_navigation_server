@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
+import { AddRoleUsersDto, CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
 import { In, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
 import { Permission } from '@/modules/permission/permission.entity';
+import { User } from '../user/user.entity';
 
 export class RoleService {
   constructor(
@@ -11,6 +12,8 @@ export class RoleService {
     private roleRepo: Repository<Role>,
     @InjectRepository(Permission)
     private permissionRepo: Repository<Permission>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
   ) {}
 
   // 创建角色
@@ -62,6 +65,32 @@ export class RoleService {
     if (role.code === 'SUPER_ADMIN') throw new BadRequestException('不允许删除超级管理员');
     if (role.users?.length) throw new BadRequestException('当前角色存在已授权的用户，不允许删除！');
     await this.roleRepo.remove(role);
+    return true;
+  }
+
+  // 给角色分配用户
+  async addRoleUsers(id: number, dto: AddRoleUsersDto) {
+    const { userIds } = dto;
+    const role = await this.roleRepo.findOne({
+      where: { id },
+      relations: { users: true },
+    });
+    if (!role) throw new BadRequestException('角色不存在或者已删除');
+    const users = await this.userRepo.find({ where: { id: In(userIds) } });
+    role.users = role.users.filter((item) => !userIds.includes(item.id)).concat(users);
+    await this.roleRepo.save(role);
+    return true;
+  }
+  // 取消用户角色分配
+  async removeRoleUsers(id: number, dto: AddRoleUsersDto) {
+    const { userIds } = dto;
+    const role = await this.roleRepo.findOne({
+      where: { id },
+      relations: { users: true },
+    });
+    if (!role) throw new BadRequestException('角色不存在或者已删除');
+    role.users = role.users.filter((item) => !userIds.includes(item.id));
+    await this.roleRepo.save(role);
     return true;
   }
 }

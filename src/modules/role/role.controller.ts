@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
+import { AddRoleUsersDto, CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('role')
@@ -41,10 +41,26 @@ export class RoleController {
     return this.roleService.update(+id, updateRoleDto);
   }
 
+  // 根据id删除角色
   @Delete('delete/:id')
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   delete(@Param('id') id: string) {
     return this.roleService.delete(+id);
+  }
+
+  // 给角色分配用户
+  @Patch('users/add/:roleId')
+  @UseGuards(PreviewGuard)
+  @Roles('SUPER_ADMIN')
+  addRoleUsers(@Param('roleId') roleId: string, @Body() dto: AddRoleUsersDto) {
+    return this.roleService.addRoleUsers(+roleId, dto);
+  }
+  // 取消用户角色
+  @Patch('users/remove/:roleId')
+  @UseGuards(PreviewGuard)
+  @Roles('SUPER_ADMIN')
+  removeRoleUsers(@Param('roleId') roleId: string, @Body() dto: AddRoleUsersDto) {
+    return this.roleService.removeRoleUsers(+roleId, dto);
   }
 }

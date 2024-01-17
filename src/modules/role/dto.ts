@@ -37,3 +37,8 @@ export class UpdateRoleDto {
   @IsOptional()
   enable?: boolean;
 }
+
+export class AddRoleUsersDto {
+  @IsArray()
+  userIds: number[];
+}
