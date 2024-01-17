@@ -1,5 +1,15 @@
 import { JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -14,7 +24,6 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   create(@Body() creteRoleDto: CreateRoleDto) {
-    console.log(creteRoleDto);
     return this.roleService.create(creteRoleDto);
   }
 
@@ -30,5 +39,12 @@ export class RoleController {
   @Roles('SUPER_ADMIN')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(+id, updateRoleDto);
+  }
+
+  @Delete('delete/:id')
+  @UseGuards(PreviewGuard)
+  @Roles('SUPER_ADMIN')
+  delete(@Param('id') id: string) {
+    return this.roleService.delete(+id);
   }
 }

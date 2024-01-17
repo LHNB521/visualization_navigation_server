@@ -52,4 +52,16 @@ export class RoleService {
   findOne(id: number) {
     return this.roleRepo.findOne({ where: { id } });
   }
+  // 删除角色
+  async delete(id: number) {
+    const role = await this.roleRepo.findOne({
+      where: { id },
+      relations: { users: true },
+    });
+    if (!role) throw new BadRequestException('角色不存在或者已删除');
+    if (role.code === 'SUPER_ADMIN') throw new BadRequestException('不允许删除超级管理员');
+    if (role.users?.length) throw new BadRequestException('当前角色存在已授权的用户，不允许删除！');
+    await this.roleRepo.remove(role);
+    return true;
+  }
 }
