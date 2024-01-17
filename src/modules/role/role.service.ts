@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateRoleDto, GetRolesDto } from './dto';
+import { CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
 import { In, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
@@ -32,5 +32,24 @@ export class RoleService {
   // 查询角色列表
   async findAll(query: GetRolesDto) {
     return this.roleRepo.find({ where: query });
+  }
+
+  // 更新角色
+  async update(id: number, updateRoleDto: UpdateRoleDto) {
+    const role = await this.findOne(id);
+    if (!role) throw new BadRequestException('角色不存在或者已删除');
+    if (role.code === 'SUPER_ADMIN') throw new BadRequestException('不允许修改超级管理员');
+    const newRole = this.roleRepo.merge(role, updateRoleDto);
+    if (updateRoleDto.permissionIds) {
+      newRole.permissions = await this.permissionRepo.find({
+        where: { id: In(updateRoleDto.permissionIds) },
+      });
+    }
+    await this.roleRepo.save(newRole);
+    return true;
+  }
+  // 根据id查询角色
+  findOne(id: number) {
+    return this.roleRepo.findOne({ where: { id } });
   }
 }

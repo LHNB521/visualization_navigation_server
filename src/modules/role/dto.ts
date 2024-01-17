@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { IsArray, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateRoleDto {
@@ -17,6 +18,22 @@ export class CreateRoleDto {
 }
 
 export class GetRolesDto {
+  @IsOptional()
+  enable?: boolean;
+}
+
+export class UpdateRoleDto {
+  @Exclude()
+  code: string;
+
+  @IsOptional()
+  name: string;
+
+  @IsOptional()
+  @IsArray()
+  permissionIds?: number[];
+
+  @IsBoolean()
   @IsOptional()
   enable?: boolean;
 }
