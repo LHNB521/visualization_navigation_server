@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddRoleUsersDto, CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
 import { Permission } from '@/modules/permission/permission.entity';
@@ -34,7 +34,26 @@ export class RoleService {
 
   // 查询角色列表
   async findAll(query: GetRolesDto) {
-    return this.roleRepo.find({ where: query });
+    const pageSize = query.pageSize || 10;
+    const pageNum = query.pageNum || 1;
+    const [data, total] = await this.roleRepo.findAndCount({
+      where: {
+        name: Like(`%${query.name || ''}%`),
+        enable: query.enable || undefined,
+      },
+      relations: { permissions: true },
+      order: {
+        name: 'DESC',
+      },
+      take: pageSize,
+      skip: (pageNum - 1) * pageSize,
+    });
+    const rows = data.map((item) => {
+      const permissionIds = item.permissions.map((p) => p.id);
+      delete item.permissions;
+      return { ...item, permissionIds };
+    });
+    return { rows, total };
   }
 
   // 更新角色
