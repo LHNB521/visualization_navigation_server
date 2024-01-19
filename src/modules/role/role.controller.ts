@@ -9,9 +9,16 @@ import {
   Post,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { AddRoleUsersDto, CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
+import {
+  AddRolePermissionsDto,
+  AddRoleUsersDto,
+  CreateRoleDto,
+  GetRolesDto,
+  UpdateRoleDto,
+} from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('role')
@@ -62,5 +69,32 @@ export class RoleController {
   @Roles('SUPER_ADMIN')
   removeRoleUsers(@Param('roleId') roleId: string, @Body() dto: AddRoleUsersDto) {
     return this.roleService.removeRoleUsers(+roleId, dto);
+  }
+
+  // 根据id获取角色
+  @Get('findeOne/:id')
+  @Roles('SUPER_ADMIN')
+  findOne(@Param('id') id: string) {
+    return this.roleService.findOne(+id);
+  }
+
+  // 获取角色权限
+  @Get('permissions')
+  findRolePermissions(@Query('id') id: number) {
+    return this.roleService.findRolePermissions(+id);
+  }
+
+  // 添加角色权限
+  @Post('permissions/add')
+  @UseGuards(PreviewGuard)
+  @Roles('SUPER_ADMIN')
+  addRolePermissions(@Body() dto: AddRolePermissionsDto) {
+    return this.roleService.addRolePermissions(dto);
+  }
+
+  // 获取角色权限树
+  @Get('permissions/tree')
+  findRolePermissionsTree(@Request() req: any) {
+    return this.roleService.findRolePermissionsTree(req.user.currentRoleCode);
   }
 }

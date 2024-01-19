@@ -1,13 +1,21 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { AddRoleUsersDto, CreateRoleDto, GetRolesDto, UpdateRoleDto } from './dto';
+import {
+  AddRolePermissionsDto,
+  AddRoleUsersDto,
+  CreateRoleDto,
+  GetRolesDto,
+  UpdateRoleDto,
+} from './dto';
 import { In, Like, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
 import { Permission } from '@/modules/permission/permission.entity';
 import { User } from '../user/user.entity';
+import { SharedService } from '@/shared/shared.service';
 
 export class RoleService {
   constructor(
+    private readonly sharedService: SharedService,
     @InjectRepository(Role)
     private roleRepo: Repository<Role>,
     @InjectRepository(Permission)
@@ -111,5 +119,43 @@ export class RoleService {
     role.users = role.users.filter((item) => !userIds.includes(item.id));
     await this.roleRepo.save(role);
     return true;
+  }
+
+  // 查询角色拥有的权限
+  async findRolePermissions(id: number) {
+    const role = await this.findOne(id);
+    if (!role) throw new BadRequestException('当前角色不存在或者已删除');
+    const res = await this.permissionRepo.find({ where: { roles: [role] } });
+    console.log(res);
+    return res;
+  }
+
+  // 给角色分配权限
+  async addRolePermissions(dto: AddRolePermissionsDto) {
+    const { permissionIds, id } = dto;
+    const role = await this.roleRepo.findOne({
+      where: { id },
+      relations: { permissions: true },
+    });
+    if (!role) throw new BadRequestException('角色不存在或者已删除');
+    if (role.code === 'SUPER_ADMIN') throw new BadRequestException('无需给超级管理员授权');
+    const permissions = await this.permissionRepo.find({
+      where: permissionIds.map((item) => ({ id: item })),
+    });
+    role.permissions = role.permissions
+      .filter((item) => !permissionIds.includes(item.id))
+      .concat(permissions);
+    await this.roleRepo.save(role);
+    return true;
+  }
+
+  // 获取角色拥有的权限树
+  async findRolePermissionsTree(code: string) {
+    const role = await this.roleRepo.findOne({ where: { code } });
+    if (!role) throw new BadRequestException('当前角色不存在或者已删除');
+    const permissions = await this.permissionRepo.find({
+      where: role.code === 'SUPER_ADMIN' ? undefined : { roles: [role] },
+    });
+    return this.sharedService.handleTree(permissions);
   }
 }

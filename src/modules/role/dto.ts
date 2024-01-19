@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Allow, IsArray, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
+import { Allow, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateRoleDto {
   @IsNotEmpty({ message: '角色编码不能为空' })
@@ -50,4 +50,12 @@ export class UpdateRoleDto {
 export class AddRoleUsersDto {
   @IsArray()
   userIds: number[];
+}
+
+export class AddRolePermissionsDto {
+  @IsNumber()
+  id: number;
+
+  @IsArray()
+  permissionIds: number[];
 }
