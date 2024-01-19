@@ -6,6 +6,7 @@ import { createClient } from 'redis';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
+import { SharedService } from './shared.service';
 
 @Global()
 @Module({
@@ -28,6 +29,7 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
     }),
   ],
   providers: [
+    SharedService,
     RedisService,
     {
       inject: [ConfigService],
@@ -59,6 +61,6 @@ import { TransformInterceptor } from '@/common/interceptors/transform.intercepto
       }),
     },
   ],
-  exports: [RedisService],
+  exports: [SharedService, RedisService],
 })
 export class SharedModule {}

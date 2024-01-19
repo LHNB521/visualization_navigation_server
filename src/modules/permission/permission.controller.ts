@@ -14,8 +14,19 @@ export class PermissionController {
     return this.permissionService.create(createPermissionDto);
   }
 
+  @Post('batch/create')
+  @UseGuards(JwtGuard)
+  createBatch(@Body() createPermissionDtos: CreatePermissionDto[]) {
+    return this.permissionService.createBatch(createPermissionDtos);
+  }
+
   @Get('list')
   findAll() {
     return this.permissionService.findAll();
+  }
+
+  @Get('tree')
+  findAllTree() {
+    return this.permissionService.findAllTree();
   }
 }
