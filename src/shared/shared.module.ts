@@ -1,5 +1,5 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisService } from './redis.service';
 import { createClient } from 'redis';
@@ -12,6 +12,8 @@ import { SharedService } from './shared.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return {
           type: 'postgres',
@@ -25,7 +27,6 @@ import { SharedService } from './shared.service';
           logging: process.env.NODE_ENV === 'development',
         };
       },
-      inject: [ConfigService],
     }),
   ],
   providers: [

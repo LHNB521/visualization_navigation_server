@@ -1,10 +1,19 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import * as session from 'express-session';
+import * as express from 'express';
+import { AppModule } from './app.module';
+import { logger } from './middleware/logger.middleware'; // 日志收集中间件
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  //日志相关
+  app.use(logger); // 所有请求都打印日志
+  // 允许跨域
+  app.enableCors();
+
+  // session缓存
   app.use(
-    // session缓存
     session({
       secret: 'lh',
       name: 'lh.session',
