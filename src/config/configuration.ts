@@ -12,18 +12,19 @@ export default () => {
     JWT_SECRET,
   } = process.env;
   return {
+    // 基础相关
     app: {
-      port: APP_PORT || 8888,
+      port: APP_PORT || 8765,
     },
     // 数据库
     database: {
-      DB_TYPE: DB_TYPE || 'postgres',
-      DB_HOST: DB_HOST || '127.0.0.1', // IP
-      DB_PORT: DB_PORT || 5432, // 端口
-      DB_USERNAME: DB_USERNAME || 'postgres', // 数据库
-      DB_PASSWORD: DB_PASSWORD || '', // 密码
-      DB_DATABASE: DB_DATABASE || 'test',
-      DB_SYNC: DB_SYNC || false,
+      DB_TYPE: DB_TYPE,
+      DB_HOST: DB_HOST, // IP
+      DB_PORT: DB_PORT, // 端口
+      DB_USERNAME: DB_USERNAME, // 数据库
+      DB_PASSWORD: DB_PASSWORD, // 密码
+      DB_DATABASE: DB_DATABASE,
+      DB_SYNC: DB_SYNC,
     },
     // redis
     redis: {

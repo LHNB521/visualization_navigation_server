@@ -1,5 +1,5 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisService } from './redis.service';
 import { createClient } from 'redis';
@@ -12,7 +12,6 @@ import { SharedService } from './shared.service';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return {

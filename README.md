@@ -62,6 +62,12 @@ pm2 stop nest-jwt
 pm2 restart nest-jwt
 ```
 
+查看日志
+
+```
+pm2 logs
+```
+
 > 注: 执行 `pm2 ls` 可查看运行的服务
 
 四、常见问题
