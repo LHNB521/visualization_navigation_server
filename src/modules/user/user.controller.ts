@@ -10,13 +10,16 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+
 import { UserService } from './user.service';
 
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import { JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-
+@ApiTags('用户管理')
+@ApiBearerAuth()
 @Controller('user')
 @UseGuards(JwtGuard, RoleGuard)
 export class UserController {
@@ -43,6 +46,8 @@ export class UserController {
   }
 
   // 获取所有用户
+  @ApiOperation({ summary: '获取所有用户信息' })
+  @ApiOkResponse({ type: GetUserDto })
   @Get('list')
   getAllUsers(@Query() queryDto: GetUserDto) {
     return this.userService.findAll(queryDto);
