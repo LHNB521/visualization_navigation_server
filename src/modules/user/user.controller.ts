@@ -18,6 +18,7 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import { JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { ReturnType } from '@/common/decorators/return-type.decorator';
 @ApiTags('用户管理')
 @ApiBearerAuth()
 @Controller('user')

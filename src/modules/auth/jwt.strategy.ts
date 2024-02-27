@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req, payload: any) {
+  async validate(req: any, payload: any) {
     const user = await this.userService.findByUsername(payload.username);
     if (!user.enable) {
       throw new CustomException(ErrorCode.ERR_11007);

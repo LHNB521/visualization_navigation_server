@@ -6,6 +6,8 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import * as svgCaptcha from 'svg-captcha';
 import { ChangePasswordDto } from './dto';
 import { UserService } from '@/modules/user/user.service';
+import { Result } from '@/common/result/result';
+import { ReturnType } from '@/common/decorators/return-type.decorator';
 
 @Controller('auth') // @Controller()装饰器，这是必需的，用于定义一个基本的控制器, ip:3000/auth/...
 export class AuthController {
@@ -17,6 +19,7 @@ export class AuthController {
 
   @UseGuards(LocalGuard) //带上装饰器 @Injectable() 并实现了 CanActivate 接口的类，就是守卫。
   @Post('login')
+  @ReturnType('primitive')
   async login(@Req() req: any, @Body() body: any) {
     // 预览模式下，直接登录
     if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
@@ -26,7 +29,8 @@ export class AuthController {
     if (req.session?.code?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
       throw new CustomException(ErrorCode.ERR_10003);
     }
-    return this.authService.login(req.user, req.session?.code);
+    const data = await this.authService.login(req.user, req.session?.code);
+    return new Result(data);
   }
 
   // 获取验证码
@@ -43,9 +47,13 @@ export class AuthController {
       mathMax: 9,
       mathOperator: '+',
     });
-    req.session.code = captcha.text || '';
+    req.session.code = captcha.text || ''; //存储验证码记录到session
+    res.set('Access-Control-Allow-Origin', '*'); // 允许所有域名进行跨域请求
+    res.set('Cross-Origin-Opener-Policy', 'cross-origin');
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     res.type('image/svg+xml');
     res.send(captcha.data);
+    return new Result(captcha.data);
   }
 
   // 退出登录

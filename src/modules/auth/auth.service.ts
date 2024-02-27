@@ -41,7 +41,6 @@ export class AuthService {
       currentRoleCode: currentRole.code,
     };
     if (this.configService.get('IS_PREVIEW') === 'true') payload['captcha'] = captcha;
-
     return this.generateToken(payload);
   }
   // 生成token
