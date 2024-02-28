@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({ name: 'exception_log', schema: 'aurora' })
+@Entity({ name: 'exception_log' })
 export class ExceptionLog {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;

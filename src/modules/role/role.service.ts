@@ -126,7 +126,6 @@ export class RoleService {
     const role = await this.findOne(id);
     if (!role) throw new BadRequestException('当前角色不存在或者已删除');
     const res = await this.permissionRepo.find({ where: { roles: [role] } });
-    console.log(res);
     return res;
   }
 

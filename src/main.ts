@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import * as session from 'express-session';
 import * as express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
 import { AppModule } from './app.module';
 import { logger } from './middleware/logger.middleware'; // 日志收集中间件
+// import { ExceptionLogService } from '@/modules/exception-log/exception-log.service';
 // import { HttpException } from '@nestjs/common';
 // import helmet from 'helmet';
 // import rateLimit from 'express-rate-limit';
