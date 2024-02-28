@@ -42,4 +42,6 @@ export class User {
   })
   @JoinTable()
   roles: Role[];
+
+  // menus: Menu[];
 }

@@ -140,6 +140,19 @@ export class UserService {
     });
   }
 
+  // 是否存在用户
+  async isExistUser(username: string) {
+    const res = await this.userRep
+      .createQueryBuilder('userinfo')
+      .select()
+      .addSelect('userinfo.password')
+      .leftJoin('userinfo.roles', 'role')
+      .addSelect(['role.id', 'role.code', 'role.name'])
+      .where('userinfo.username = :username', { username })
+      .getOne();
+    return res;
+  }
+
   // 重置密码
   async resetPassword(id: number, password: string) {
     const user = await this.userRep.findOne({ where: { id } });

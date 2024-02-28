@@ -32,6 +32,10 @@ export class AuthService {
     if (!user.roles?.some((item: any) => item.enable)) {
       throw new CustomException(ErrorCode.ERR_11003);
     }
+    // 判断用户是否存在
+    const userinfor = await this.userService.isExistUser(user.username);
+    console.log(userinfor);
+
     const roleCodes = user.roles?.map((item: any) => item.code);
     const currentRole = user.roles[0];
     const payload = {

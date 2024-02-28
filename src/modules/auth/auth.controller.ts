@@ -19,7 +19,7 @@ export class AuthController {
 
   @UseGuards(LocalGuard) //带上装饰器 @Injectable() 并实现了 CanActivate 接口的类，就是守卫。
   @Post('login')
-  @ReturnType('primitive')
+  @ReturnType('primitive') // 返回值类型
   async login(@Req() req: any, @Body() body: any) {
     // 预览模式下，直接登录
     if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
