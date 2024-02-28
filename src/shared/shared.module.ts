@@ -1,8 +1,8 @@
 import { Global, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RedisService } from './redis.service';
-import { createClient } from 'redis';
+// import { RedisService } from './redis.service';
+// import { createClient } from 'redis';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
@@ -30,18 +30,17 @@ import { SharedService } from './shared.service';
   ],
   providers: [
     SharedService,
-    RedisService,
-    {
-      inject: [ConfigService],
-      provide: 'REDIS_CLIENT',
-      async useFactory(configService: ConfigService) {
-        const client = createClient({
-          url: configService.get('REDIS_URL'),
-        });
-        await client.connect();
-        return client;
-      },
-    },
+    // {
+    //   inject: [ConfigService],
+    //   provide: 'REDIS_CLIENT',
+    //   async useFactory(configService: ConfigService) {
+    //     const client = createClient({
+    //       url: configService.get('REDIS_URL'),
+    //     });
+    //     await client.connect();
+    //     return client;
+    //   },
+    // },
     {
       // 全局错误过滤器
       provide: APP_FILTER,
@@ -61,6 +60,6 @@ import { SharedService } from './shared.service';
       }),
     },
   ],
-  exports: [SharedService, RedisService],
+  exports: [SharedService],
 })
 export class SharedModule {}

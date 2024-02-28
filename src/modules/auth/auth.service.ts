@@ -4,7 +4,7 @@ import { UserService } from '@/modules/user/user.service';
 import { compareSync } from 'bcryptjs';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '@/shared/redis.service';
+import { RedisService } from '@/modules/redis/redis.service';
 import { ACCESS_TOKEN_EXPIRATION_TIME, USER_ACCESS_TOKEN_KEY } from '@/constants/redis.contant';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class AuthService {
   // 生成token
   generateToken(payload: any) {
     const accessToken = this.jwtService.sign(payload);
-    this.redisService.set(
+    this.redisService.setValue(
       this.getAccessTokenKey(payload),
       accessToken,
       ACCESS_TOKEN_EXPIRATION_TIME,
@@ -68,7 +68,7 @@ export class AuthService {
 
   async logout(user: any) {
     if (user.userId) {
-      await Promise.all([this.redisService.del(this.getAccessTokenKey({ user }))]);
+      await Promise.all([this.redisService.delValue(this.getAccessTokenKey({ user }))]);
       return true;
     }
     return false;
