@@ -12,7 +12,9 @@ import { HttpFilter } from './common/filter';
 import { Response } from './common/response';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // 解析来自客户端的 JSON 格式的请求体数据
   app.use(express.json());
+  // 是解析客户端发送的 URL 编码（URL-encoded）请求体数据
   app.use(express.urlencoded({ extended: true }));
 
   //日志相关
@@ -27,6 +29,7 @@ async function bootstrap() {
   // 响应拦截器
   app.useGlobalInterceptors(new Response());
 
+  // 用于自动验证所有控制器方法的输入参数，确保传入的数据符合预期的结构和规则。
   app.useGlobalPipes(new ValidationPipe());
 
   // helmet头部安全
@@ -36,9 +39,8 @@ async function bootstrap() {
     rateLimit({
       windowMs: 60 * 1000, //1分钟
       max: 100, //允许每个ip在这windows时间里请求的次数
-      handler: (req, res) => {
+      handler: (req, res, next) => {
         const httpFilter: any = new HttpFilter(exceptionLogService);
-
         httpFilter.catch(new HttpException('当前请求过多，请稍后重试', 429), {
           switchToHttp: () => ({
             getRequest: () => req,
