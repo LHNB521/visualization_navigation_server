@@ -7,36 +7,38 @@ import * as svgCaptcha from 'svg-captcha';
 import { ChangePasswordDto } from './dto/dto';
 import { UserService } from '@/modules/user/user.service';
 import { Result } from '@/common/result/result';
+import { RedisService } from '../redis/redis.service';
 // import { ReturnType } from '@/common/decorators/return-type.decorator';
 
-@Controller('auth') // @Controller()装饰器，这是必需的，用于定义一个基本的控制器, ip:3000/auth/...
+@Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private userService: UserService,
     private configService: ConfigService,
+    private readonly redisService: RedisService,
   ) {}
 
-  @UseGuards(LocalGuard) //带上装饰器 @Injectable() 并实现了 CanActivate 接口的类，就是守卫。
+  @UseGuards(LocalGuard)
   @Post('login')
-  // @ReturnType('primitive') // 返回值类型
   async login(@Req() req: any, @Body() body: any) {
     // 预览模式下，直接登录
     if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
-      return this.authService.login(req.user, req.session?.code);
+      return this.authService.login(req.user, req.session?.captcha);
     }
     // 验证码校验
-    if (req.session?.code?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
+    if (req.session?.captcha?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
       throw new CustomException(ErrorCode.ERR_10003);
     }
-    const data = await this.authService.login(req.user, req.session?.code);
+    const data = await this.authService.login(req.user, req.session?.captcha);
     // return new Result(data);
     return data;
   }
 
   // 获取验证码
+  //利用svg-captcha生成校验码图片并存储在前端session中
   @Get('captcha')
-  async createCaptcha(@Req() req: any, @Res() res: any) {
+  createCaptcha(@Req() req: any, @Res() res: any) {
     const captcha = svgCaptcha.createMathExpr({
       size: 4,
       fontSize: 50,
@@ -48,7 +50,9 @@ export class AuthController {
       mathMax: 9,
       mathOperator: '+',
     });
-    req.session.code = captcha.text || ''; //存储验证码记录到session
+    req.session.captcha = captcha.text; //存储验证码记录到session
+    this.redisService.setValue(`vis_captcha:${captcha.text}`, captcha.text, 60);
+
     res.set('Access-Control-Allow-Origin', '*'); // 允许所有域名进行跨域请求
     res.set('Cross-Origin-Opener-Policy', 'cross-origin');
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
