@@ -19,6 +19,7 @@ async function bootstrap() {
 
   //日志相关
   app.use(logger); // 所有请求都打印日志
+
   // 允许跨域
   app.enableCors();
 

@@ -19,7 +19,6 @@ export class RedisService {
   }
 
   getValue(key: string) {
-    console.log(key);
     return this.redisClient.get(key);
   }
 
@@ -29,7 +28,6 @@ export class RedisService {
 
   async getAllKeys(pattern: string) {
     const keys = await this.redisClient.keys(pattern);
-    console.log(keys);
     return keys;
   }
 

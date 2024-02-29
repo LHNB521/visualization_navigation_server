@@ -3,9 +3,9 @@ import { Global, Module, ValidationPipe } from '@nestjs/common';
 // import { TypeOrmModule } from '@nestjs/typeorm';
 // // import { RedisService } from './redis.service';
 // // import { createClient } from 'redis';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+// import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 // import { AllExceptionFilter } from '@/common/filters/all-exception.filter';
-import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
+// import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 import { SharedService } from './shared.service';
 
 @Global()
