@@ -14,10 +14,15 @@ export class Response<T> implements NestInterceptor {
     return next.handle().pipe(
       map((result) => {
         return {
-          data: result.data,
-          status: result.status,
-          message: result.message,
-          success: result.success,
+          // data: result.data,
+          // status: result.status,
+          // message: result.message,
+          // success: result.success,
+          code: 200,
+          message: null,
+          data: result,
+          originalUrl: result.originalUrl,
+          success: true,
         };
       }),
     );
