@@ -1,22 +1,12 @@
-// import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
-// import { ACCESS_TOKEN_EXPIRATION_TIME } from '@/constants/redis.contant';
-// import { RedisService } from '@/shared/redis.service';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-// import { ConfigService } from '@nestjs/config';
-// import { UserService } from '../user/user.service';
-// import { AuthService } from './auth.service';
-import { jwtConstants } from './constants';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { jwtConstants } from './constants';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    // private anthService: AuthService, // private userService: UserService, // private redisService: RedisService, // protected configService: ConfigService,
     super({
-      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // secretOrKey: process.env.JWT_SECRET || configService.get('JWT_SECRET'),
-      // ignoreExpiration: false,
-      // passReqToCallback: true,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
@@ -24,33 +14,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // const user = await this.userService.findByUsername(payload.username);
-    // if (!user.enable) {
-    //   throw new CustomException(ErrorCode.ERR_11007);
-    // }
-    // const currentRole = user.roles.find((item) => item.code === payload.currentRoleCode);
-    // if (!currentRole.enable) {
-    //   throw new CustomException(ErrorCode.ERR_11008);
-    // }
-
-    // // 从请求头中提取JWT
-    // const reqToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    // // 从Redis中获取用户访问令牌
-    // const accessToken = await this.redisService.get(this.anthService.getAccessTokenKey(payload));
-
-    // // 如果请求令牌不等于访问令牌
-    // if (reqToken !== accessToken) {
-    //   this.redisService.del(this.anthService.getAccessTokenKey(payload));
-    //   throw new HttpException(ErrorCode.ERR_11002, HttpStatus.UNAUTHORIZED);
-    // }
-
-    // // 延长token过期时间
-    // this.redisService.set(
-    //   this.anthService.getAccessTokenKey(payload),
-    //   accessToken,
-    //   ACCESS_TOKEN_EXPIRATION_TIME,
-    // );
-
     return {
       userId: payload.userId,
       username: payload.username,

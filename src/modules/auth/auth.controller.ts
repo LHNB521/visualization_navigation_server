@@ -4,7 +4,7 @@ import { JwtGuard, LocalGuard, PreviewGuard } from '@/common/guards';
 import { AuthService } from './auth.service';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import * as svgCaptcha from 'svg-captcha';
-import { ChangePasswordDto } from './dto';
+import { ChangePasswordDto } from './dto/dto';
 import { UserService } from '@/modules/user/user.service';
 import { Result } from '@/common/result/result';
 // import { ReturnType } from '@/common/decorators/return-type.decorator';
