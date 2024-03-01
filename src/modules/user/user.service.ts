@@ -3,20 +3,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, Like } from 'typeorm';
 import { User } from './entities/user.entity';
 import { hashSync } from 'bcryptjs';
-import { GetUserDto, CreateUserDto } from './dto';
+import { GetUserDto, CreateUserDto } from './dto/dto';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import { Role } from '../role/role.entity';
-import { Profile } from './profile.entity';
+import { RoleMenuService } from '../role-menu/role-menu.service';
+import { MenuService } from '../menu/menu.service';
+import getMenuList from '@/utils/getMenuList';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRep: Repository<User>,
-    @InjectRepository(Role)
-    private roleRepo: Repository<Role>,
-    @InjectRepository(Profile)
-    private profileRep: Repository<Profile>,
+    private readonly userRepository: Repository<User>,
+    private readonly roleMenuService: RoleMenuService,
+    private readonly menuService: MenuService,
+    // @InjectRepository(Role)
+    // private roleRepo: Repository<Role>,
   ) {}
 
   // 创建用户
@@ -28,7 +30,7 @@ export class UserService {
     //   throw new CustomException(ErrorCode.ERR_10001);
     // }
 
-    const newUser = this.userRep.create(user);
+    const newUser = this.userRepository.create(user);
     // 判断角色是否存在
     // if (user.roleIds !== undefined) {
     //   newUser.roles = await this.roleRepo.find({
@@ -36,12 +38,12 @@ export class UserService {
     //   });
     // }
 
-    if (!newUser.profile) {
-      newUser.profile = this.profileRep.create();
-    }
+    // if (!newUser.profile) {
+    //   newUser.profile = this.profileRep.create();
+    // }
 
     newUser.password = hashSync(newUser.password);
-    await this.userRep.save(newUser);
+    await this.userRepository.save(newUser);
 
     return true;
   }
@@ -52,14 +54,14 @@ export class UserService {
     if (id == 1) throw new CustomException(ErrorCode.ERR_11006, '不能删除根用户');
 
     // 删除用户表
-    await this.userRep.delete(id);
+    await this.userRepository.delete(id);
 
     // 删除用户信息表
-    await this.profileRep
-      .createQueryBuilder('profile')
-      .delete()
-      .where('userId = :id', { id })
-      .execute();
+    // await this.profileRep
+    //   .createQueryBuilder('profile')
+    //   .delete()
+    //   .where('userId = :id', { id })
+    //   .execute();
 
     return true;
   }
@@ -68,7 +70,7 @@ export class UserService {
   async findAll(query: GetUserDto) {
     // const pageSize = query.pageSize || 10;
     // const pageNum = query.pageNum || 1;
-    // const [users, total] = await this.userRep.findAndCount({
+    // const [users, total] = await this.userRepository.findAndCount({
     //   select: {
     //     profile: {
     //       gender: true,
@@ -108,26 +110,24 @@ export class UserService {
   }
 
   // 根据用户id查询用户详情
-  async findUserDetail(id: number, roleCode: string) {
-    // 查询用户信息
-    // const user = await this.userRep.findOne({
-    //   where: { id },
-    //   relations: {
-    //     profile: true,
-    //     roles: true,
-    //   },
-    // });
-    // 查询当前用户角色
-    // const currentRole = user.roles?.find((item) => item.code === roleCode && item.enable);
-    // if (!currentRole) {
-    //   throw new CustomException(ErrorCode.ERR_11005, '您目前暂无此角色或已被禁用，请联系管理员');
-    // }
-    // return { ...user, currentRole };
+  async findUserDetail(id: number) {
+    const data = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.userRole', 'role')
+      .addSelect(['role.id', 'role.name', 'role.code'])
+      .where('user.id=:id', { id })
+      .getOne();
+    const roleId = data.userRole.id;
+    const menuIds = await this.roleMenuService.findIdByRoleId(roleId);
+    const menu = getMenuList(await this.menuService.getMenuByIds(menuIds));
+    data.menus = menu;
+    console.log(data);
+    return { userinfo: data };
   }
 
   // 根据用户名查询用户信息
   async findByUsername(username: string) {
-    // return this.userRep.findOne({
+    // return this.userRepository.findOne({
     //   where: { username },
     //   select: ['id', 'username', 'password', 'enable'],
     //   relations: {
@@ -139,7 +139,7 @@ export class UserService {
 
   // 是否存在用户
   async isExistUser(username: string) {
-    const res = await this.userRep
+    const res = await this.userRepository
       .createQueryBuilder('userinfo')
       .select()
       .addSelect('userinfo.password')
@@ -152,9 +152,9 @@ export class UserService {
 
   // 重置密码
   async resetPassword(id: number, password: string) {
-    const user = await this.userRep.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
     user.password = hashSync(password);
-    await this.userRep.save(user);
+    await this.userRepository.save(user);
     return true;
   }
 }

@@ -3,13 +3,11 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Profile } from './profile.entity';
-import { Role } from '@/modules/role/role.entity';
 import { Share } from '@/utils/share';
-
-@Global()
+import { RoleMenuModule } from '../role-menu/role-menu.module';
+import { MenuModule } from '../menu/menu.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Profile, Role]), Share],
+  imports: [TypeOrmModule.forFeature([User]), RoleMenuModule, MenuModule, Share],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
 import { RoleMenu } from '../role-menu/entities/role-menu.entity';
 import { RoleResource } from '../role-resource/entities/role-resource.entity';
@@ -17,12 +17,12 @@ export class Role {
   @Column({ name: 'enable', default: () => true, comment: '是否启用' })
   enable: boolean;
 
-  @OneToMany(() => User, (user) => user.userRole)
-  users: User[];
-
   @OneToMany(() => RoleMenu, (roleMenu) => roleMenu.role)
   roleMenus: RoleMenu[];
 
   @OneToMany(() => RoleResource, (roleResource) => roleResource.role)
   roleResources: RoleResource[];
+
+  @OneToMany(() => User, (user) => user.userRole)
+  users: User[];
 }

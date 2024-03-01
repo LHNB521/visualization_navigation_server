@@ -19,7 +19,6 @@ export class JwtMiddleware implements NestMiddleware {
         throw new tokenError('token过期或token错误，请重新登录');
       }
     }
-
     next();
   }
 }

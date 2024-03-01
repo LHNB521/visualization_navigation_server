@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -16,19 +17,20 @@ import { UserService } from './user.service';
 
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import { JwtGuard, PreviewGuard } from '@/common/guards';
-import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto';
+import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto/dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { AdminGuard } from '@/common/guards/admin.guard';
+import { Result } from '@/common/result';
 
 @ApiTags('用户管理')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtGuard, AdminGuard)
+@UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  @UseGuards(PreviewGuard)
+  @UseGuards(JwtGuard, AdminGuard)
   @Roles('SUPER_ADMIN')
   addUser(@Body() user: CreateUserDto) {
     return this.userService.create(user);
@@ -57,10 +59,10 @@ export class UserController {
 
   // 获取当前登录用户详情
   @Get('detail')
-  getUserInfor(@Request() req: any) {
-    console.log(req.user);
-    const currentUser = req.user;
-    return this.userService.findUserDetail(currentUser.userId, currentUser.currentRoleCode);
+  async getUserInfor(@Req() res: any) {
+    const userId = res.user.userId;
+    const data = await this.userService.findUserDetail(userId);
+    return new Result(data);
   }
 
   // 管理员重置密码

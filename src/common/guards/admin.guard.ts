@@ -11,9 +11,9 @@ export class AdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const path = req.route.path;
     const method = req.method;
-    console.log(req.user);
-
     const data = JSON.parse(await this.redisService.getValue(`user:${req.user.userId}`));
+    console.log(data);
+
     if (data == null) throw new loginError('请登录');
     const resource = data.resource;
     for (let i = 0; i < resource.length; i++) {
