@@ -1,6 +1,8 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '@/modules/user/user.entity';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '@/modules/user/entities/user.entity';
 import { Permission } from '@/modules/permission/permission.entity';
+import { RoleMenu } from '../role-menu/entities/role-menu.entity';
+import { RoleResource } from '../role-resource/entities/role-resource.entity';
 
 @Entity({ name: 'role' })
 export class Role {
@@ -16,9 +18,7 @@ export class Role {
   @Column({ name: 'enable', default: () => true, comment: '是否启用' })
   enable: boolean;
 
-  @ManyToMany(() => User, (user) => user.roles, {
-    createForeignKeyConstraints: false,
-  })
+  @OneToMany(() => User, (user) => user.userRole)
   users: User[];
 
   @ManyToMany(() => Permission, (permission) => permission.roles, {
@@ -26,4 +26,10 @@ export class Role {
   })
   @JoinTable()
   permissions: Permission[];
+
+  @OneToMany(() => RoleMenu, (roleMenu) => roleMenu.role)
+  roleMenus: RoleMenu[];
+
+  @OneToMany(() => RoleResource, (roleResource) => roleResource.role)
+  roleResources: RoleResource[];
 }

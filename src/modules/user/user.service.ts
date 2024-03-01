@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, Like } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { hashSync } from 'bcryptjs';
 import { GetUserDto, CreateUserDto } from './dto';
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
@@ -24,17 +24,17 @@ export class UserService {
     const { username } = user;
     const existUser = await this.findByUsername(username);
     // 判断用户是否存在
-    if (existUser) {
-      throw new CustomException(ErrorCode.ERR_10001);
-    }
+    // if (existUser) {
+    //   throw new CustomException(ErrorCode.ERR_10001);
+    // }
 
     const newUser = this.userRep.create(user);
     // 判断角色是否存在
-    if (user.roleIds !== undefined) {
-      newUser.roles = await this.roleRepo.find({
-        where: { id: In(user.roleIds) },
-      });
-    }
+    // if (user.roleIds !== undefined) {
+    //   newUser.roles = await this.roleRepo.find({
+    //     where: { id: In(user.roleIds) },
+    //   });
+    // }
 
     if (!newUser.profile) {
       newUser.profile = this.profileRep.create();
@@ -66,78 +66,75 @@ export class UserService {
 
   // 根据查询所有用户信息
   async findAll(query: GetUserDto) {
-    const pageSize = query.pageSize || 10;
-    const pageNum = query.pageNum || 1;
-    const [users, total] = await this.userRep.findAndCount({
-      select: {
-        profile: {
-          gender: true,
-          avatar: true,
-          email: true,
-          address: true,
-          nickName: true,
-        },
-        roles: true,
-      },
-      relations: {
-        profile: true,
-        roles: true,
-      },
-      where: {
-        username: Like(`%${query.username || ''}%`),
-        enable: query.enable || undefined,
-        profile: {
-          gender: query.gender || undefined,
-        },
-      },
-      order: {
-        createTime: 'ASC',
-      },
-      take: pageSize,
-      skip: (pageNum - 1) * pageSize,
-    });
-    const rows = users.map((item: any) => {
-      const newItem = {
-        ...item,
-        ...item.profile,
-      };
-      delete newItem.profile;
-      return newItem;
-    });
-    return { rows, total };
+    // const pageSize = query.pageSize || 10;
+    // const pageNum = query.pageNum || 1;
+    // const [users, total] = await this.userRep.findAndCount({
+    //   select: {
+    //     profile: {
+    //       gender: true,
+    //       avatar: true,
+    //       email: true,
+    //       address: true,
+    //       nickName: true,
+    //     },
+    //     roles: true,
+    //   },
+    //   relations: {
+    //     profile: true,
+    //     roles: true,
+    //   },
+    //   where: {
+    //     username: Like(`%${query.username || ''}%`),
+    //     enable: query.enable || undefined,
+    //     profile: {
+    //       gender: query.gender || undefined,
+    //     },
+    //   },
+    //   order: {
+    //     createTime: 'ASC',
+    //   },
+    //   take: pageSize,
+    //   skip: (pageNum - 1) * pageSize,
+    // });
+    // const rows = users.map((item: any) => {
+    //   const newItem = {
+    //     ...item,
+    //     ...item.profile,
+    //   };
+    //   delete newItem.profile;
+    //   return newItem;
+    // });
+    // return { rows, total };
   }
 
   // 根据用户id查询用户详情
   async findUserDetail(id: number, roleCode: string) {
     // 查询用户信息
-    const user = await this.userRep.findOne({
-      where: { id },
-      relations: {
-        profile: true,
-        roles: true,
-      },
-    });
-
+    // const user = await this.userRep.findOne({
+    //   where: { id },
+    //   relations: {
+    //     profile: true,
+    //     roles: true,
+    //   },
+    // });
     // 查询当前用户角色
-    const currentRole = user.roles?.find((item) => item.code === roleCode && item.enable);
-
-    if (!currentRole) {
-      throw new CustomException(ErrorCode.ERR_11005, '您目前暂无此角色或已被禁用，请联系管理员');
-    }
-
-    return { ...user, currentRole };
+    // const currentRole = user.roles?.find((item) => item.code === roleCode && item.enable);
+    // if (!currentRole) {
+    //   throw new CustomException(ErrorCode.ERR_11005, '您目前暂无此角色或已被禁用，请联系管理员');
+    // }
+    // return { ...user, currentRole };
   }
 
   // 根据用户名查询用户信息
   async findByUsername(username: string) {
-    return this.userRep.findOne({
-      where: { username },
-      select: ['id', 'username', 'password', 'enable'],
-      relations: {
-        profile: true,
-        roles: true,
-      },
-    });
+    // return this.userRep.findOne({
+    //   where: { username },
+    //   select: ['id', 'username', 'password', 'enable'],
+    //   relations: {
+    //     profile: true,
+    //     roles: true,
+    //   },
+    // });
   }
 
   // 是否存在用户
@@ -146,7 +143,7 @@ export class UserService {
       .createQueryBuilder('userinfo')
       .select()
       .addSelect('userinfo.password')
-      .leftJoin('userinfo.roles', 'role')
+      .leftJoin('userinfo.userRole', 'role')
       .addSelect(['role.id', 'role.code', 'role.name'])
       .where('userinfo.username = :username', { username })
       .getOne();

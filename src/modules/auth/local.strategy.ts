@@ -11,8 +11,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(username: string, password: string): Promise<any> {
-    const user = await this.authSerevice.validateUser(username, password);
-    if (!user) throw new CustomException(ErrorCode.ERR_10002);
-    return user;
+    // const user = await this.authSerevice.validateUser(username, password);
+    // if (!user) throw new CustomException(ErrorCode.ERR_10002);
+    // return user;
   }
 }

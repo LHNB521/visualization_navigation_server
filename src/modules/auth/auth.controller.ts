@@ -9,7 +9,8 @@ import { UserService } from '@/modules/user/user.service';
 import { Result } from '@/common/result/result';
 import { RedisService } from '../redis/redis.service';
 // import { ReturnType } from '@/common/decorators/return-type.decorator';
-
+import { User } from '@/modules/user/entities/user.entity';
+import { registerError } from '@/common/exception';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -19,20 +20,35 @@ export class AuthController {
     private readonly redisService: RedisService,
   ) {}
 
-  @UseGuards(LocalGuard)
+  // @UseGuards(LocalGuard)
   @Post('login')
-  async login(@Req() req: any, @Body() body: any) {
-    // 预览模式下，直接登录
-    if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
-      return this.authService.login(req.user, req.session?.captcha);
+  async login(@Body() userInfo: User | any) {
+    const { username, password, captcha } = userInfo;
+    // // 预览模式下，直接登录
+    // if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
+    //   return this.authService.login(req.user, req.session?.captcha);
+    // }
+    // // 验证码校验
+    // if (req.session?.captcha?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
+    //   throw new CustomException(ErrorCode.ERR_10003);
+    // }
+    const arrVal = [];
+    const keys = await this.redisService.getAllKeys('vis_captcha:*');
+    for (let i = 0; i < keys.length; i++) {
+      const val = await this.redisService.getValue(keys[i]);
+      arrVal.push(val);
     }
-    // 验证码校验
-    if (req.session?.captcha?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
-      throw new CustomException(ErrorCode.ERR_10003);
+    let flag = false;
+    for (let i = 0; i < arrVal.length; i++) {
+      if (captcha?.toLocaleLowerCase() == arrVal[i].toLocaleLowerCase()) {
+        flag = true;
+        break;
+      }
     }
-    const data = await this.authService.login(req.user, req.session?.captcha);
-    // return new Result(data);
-    return data;
+    if (!flag) throw new registerError('验证码有误');
+
+    const data = await this.authService.login(username, password);
+    return new Result(data);
   }
 
   // 获取验证码
@@ -50,7 +66,7 @@ export class AuthController {
       mathMax: 9,
       mathOperator: '+',
     });
-    req.session.captcha = captcha.text; //存储验证码记录到session
+    req.session.captcha = captcha.text; // 存储验证码记录到session
     this.redisService.setValue(`vis_captcha:${captcha.text}`, captcha.text, 60);
 
     res.set('Access-Control-Allow-Origin', '*'); // 允许所有域名进行跨域请求
@@ -72,14 +88,14 @@ export class AuthController {
   @Post('password')
   @UseGuards(JwtGuard, PreviewGuard)
   async changePassword(@Req() req: any, @Body() body: ChangePasswordDto) {
-    const ret = await this.authService.validateUser(req.user.username, body.oldPassword);
-    if (!ret) {
-      throw new CustomException(ErrorCode.ERR_10004);
-    }
-    // 修改密码
-    await this.userService.resetPassword(req.user.id, body.newPassword);
-    // 修改密码后退出登录
-    await this.authService.logout(req.user);
-    return true;
+    // const ret = await this.authService.validateUser(req.user.username, body.oldPassword);
+    // if (!ret) {
+    //   throw new CustomException(ErrorCode.ERR_10004);
+    // }
+    // // 修改密码
+    // await this.userService.resetPassword(req.user.id, body.newPassword);
+    // // 修改密码后退出登录
+    // await this.authService.logout(req.user);
+    // return true;
   }
 }

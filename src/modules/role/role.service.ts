@@ -10,7 +10,7 @@ import { In, Like, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
 import { Permission } from '@/modules/permission/permission.entity';
-import { User } from '../user/user.entity';
+import { User } from '../user/entities/user.entity';
 import { SharedService } from '@/shared/shared.service';
 
 export class RoleService {

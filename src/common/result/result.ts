@@ -1,12 +1,12 @@
 export class Result {
   private data: any;
-  private code: number;
+  private status: number;
   private message: string;
   private success: boolean;
   private path: string;
-  constructor(data = null, code = 200, message = null, success = true) {
+  constructor(data = null, status = 200, message = null, success = true) {
     this.data = data;
-    this.code = code;
+    this.status = status;
     this.message = message;
     this.success = success;
   }
