@@ -1,6 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
-import { Permission } from '@/modules/permission/permission.entity';
 import { RoleMenu } from '../role-menu/entities/role-menu.entity';
 import { RoleResource } from '../role-resource/entities/role-resource.entity';
 
@@ -20,12 +19,6 @@ export class Role {
 
   @OneToMany(() => User, (user) => user.userRole)
   users: User[];
-
-  @ManyToMany(() => Permission, (permission) => permission.roles, {
-    createForeignKeyConstraints: false,
-  })
-  @JoinTable()
-  permissions: Permission[];
 
   @OneToMany(() => RoleMenu, (roleMenu) => roleMenu.role)
   roleMenus: RoleMenu[];

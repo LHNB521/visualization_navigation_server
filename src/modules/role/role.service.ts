@@ -9,17 +9,12 @@ import {
 import { In, Like, Repository } from 'typeorm';
 import { Role } from './role.entity';
 import { BadRequestException } from '@nestjs/common';
-import { Permission } from '@/modules/permission/permission.entity';
 import { User } from '../user/entities/user.entity';
-import { SharedService } from '@/shared/shared.service';
 
 export class RoleService {
   constructor(
-    private readonly sharedService: SharedService,
     @InjectRepository(Role)
     private roleRepo: Repository<Role>,
-    @InjectRepository(Permission)
-    private permissionRepo: Repository<Permission>,
     @InjectRepository(User)
     private userRepo: Repository<User>,
   ) {}
@@ -33,9 +28,9 @@ export class RoleService {
 
     const role = this.roleRepo.create(createRoleDto);
     if (createRoleDto.permissionIds) {
-      role.permissions = await this.permissionRepo.find({
-        where: { id: In(createRoleDto.permissionIds) },
-      });
+      // role.permissions = await this.permissionRepo.find({
+      //   where: { id: In(createRoleDto.permissionIds) },
+      // });
     }
     return this.roleRepo.save(role);
   }
@@ -49,7 +44,6 @@ export class RoleService {
         name: Like(`%${query.name || ''}%`),
         enable: query.enable || undefined,
       },
-      relations: { permissions: true },
       order: {
         name: 'DESC',
       },
@@ -57,9 +51,7 @@ export class RoleService {
       skip: (pageNum - 1) * pageSize,
     });
     const rows = data.map((item) => {
-      const permissionIds = item.permissions.map((p) => p.id);
-      delete item.permissions;
-      return { ...item, permissionIds };
+      return { ...item };
     });
     return { rows, total };
   }
@@ -71,9 +63,9 @@ export class RoleService {
     if (role.code === 'SUPER_ADMIN') throw new BadRequestException('不允许修改超级管理员');
     const newRole = this.roleRepo.merge(role, updateRoleDto);
     if (updateRoleDto.permissionIds) {
-      newRole.permissions = await this.permissionRepo.find({
-        where: { id: In(updateRoleDto.permissionIds) },
-      });
+      // newRole.permissions = await this.permissionRepo.find({
+      //   where: { id: In(updateRoleDto.permissionIds) },
+      // });
     }
     await this.roleRepo.save(newRole);
     return true;
@@ -125,8 +117,8 @@ export class RoleService {
   async findRolePermissions(id: number) {
     const role = await this.findOne(id);
     if (!role) throw new BadRequestException('当前角色不存在或者已删除');
-    const res = await this.permissionRepo.find({ where: { roles: [role] } });
-    return res;
+    // const res = await this.permissionRepo.find({ where: { roles: [role] } });
+    // return res;
   }
 
   // 给角色分配权限
@@ -134,16 +126,9 @@ export class RoleService {
     const { permissionIds, id } = dto;
     const role = await this.roleRepo.findOne({
       where: { id },
-      relations: { permissions: true },
     });
     if (!role) throw new BadRequestException('角色不存在或者已删除');
     if (role.code === 'SUPER_ADMIN') throw new BadRequestException('无需给超级管理员授权');
-    const permissions = await this.permissionRepo.find({
-      where: permissionIds.map((item) => ({ id: item })),
-    });
-    role.permissions = role.permissions
-      .filter((item) => !permissionIds.includes(item.id))
-      .concat(permissions);
     await this.roleRepo.save(role);
     return true;
   }
@@ -152,9 +137,9 @@ export class RoleService {
   async findRolePermissionsTree(code: string) {
     const role = await this.roleRepo.findOne({ where: { code } });
     if (!role) throw new BadRequestException('当前角色不存在或者已删除');
-    const permissions = await this.permissionRepo.find({
-      where: role.code === 'SUPER_ADMIN' ? undefined : { roles: [role] },
-    });
-    return this.sharedService.handleTree(permissions);
+    // const permissions = await this.permissionRepo.find({
+    //   where: role.code === 'SUPER_ADMIN' ? undefined : { roles: [role] },
+    // });
+    // return this.sharedService.handleTree(permissions);
   }
 }

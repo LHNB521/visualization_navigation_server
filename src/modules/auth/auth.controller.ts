@@ -6,7 +6,7 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import * as svgCaptcha from 'svg-captcha';
 import { ChangePasswordDto } from './dto/dto';
 import { UserService } from '@/modules/user/user.service';
-import { Result } from '@/common/result/result';
+import { Result } from '@/common/result';
 import { RedisService } from '../redis/redis.service';
 // import { ReturnType } from '@/common/decorators/return-type.decorator';
 import { User } from '@/modules/user/entities/user.entity';
@@ -24,14 +24,6 @@ export class AuthController {
   @Post('login')
   async login(@Body() userInfo: User | any) {
     const { username, password, captcha } = userInfo;
-    // // 预览模式下，直接登录
-    // if (this.configService.get('IS_PREVIEW') === 'true' && body.isQuick) {
-    //   return this.authService.login(req.user, req.session?.captcha);
-    // }
-    // // 验证码校验
-    // if (req.session?.captcha?.toLocaleLowerCase() !== body.captcha?.toLocaleLowerCase()) {
-    //   throw new CustomException(ErrorCode.ERR_10003);
-    // }
     const arrVal = [];
     const keys = await this.redisService.getAllKeys('vis_captcha:*');
     for (let i = 0; i < keys.length; i++) {
@@ -68,7 +60,6 @@ export class AuthController {
     });
     req.session.captcha = captcha.text; // 存储验证码记录到session
     this.redisService.setValue(`vis_captcha:${captcha.text}`, captcha.text, 60);
-
     res.set('Access-Control-Allow-Origin', '*'); // 允许所有域名进行跨域请求
     res.set('Cross-Origin-Opener-Policy', 'cross-origin');
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -81,6 +72,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtGuard)
   async logout(@Req() req: any) {
+    console.log(req.user);
     return this.authService.logout(req.user);
   }
 

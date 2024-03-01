@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ExceptionLogService } from './exception-log.service';
-import { Result } from '@/common/result/result';
+import { Result } from '@/common/result';
 import { ExceptionLog } from './entities/exception-log.entity';
 
 @Controller('exception-log')

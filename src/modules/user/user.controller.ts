@@ -15,14 +15,15 @@ import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth } from '@nestjs/swa
 import { UserService } from './user.service';
 
 import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
-import { JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
+import { JwtGuard, PreviewGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { ReturnType } from '@/common/decorators/return-type.decorator';
+import { AdminGuard } from '@/common/guards/admin.guard';
+
 @ApiTags('用户管理')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtGuard, RoleGuard)
+@UseGuards(JwtGuard, AdminGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -57,6 +58,7 @@ export class UserController {
   // 获取当前登录用户详情
   @Get('detail')
   getUserInfor(@Request() req: any) {
+    console.log(req.user);
     const currentUser = req.user;
     return this.userService.findUserDetail(currentUser.userId, currentUser.currentRoleCode);
   }

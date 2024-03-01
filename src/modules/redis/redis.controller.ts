@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param } from '@nestjs/common';
 import { RedisService } from './redis.service';
-import { Result } from '@/common/result/result';
+import { Result } from '@/common/result';
 
 @Controller('redis')
 export class RedisController {

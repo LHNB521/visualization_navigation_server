@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Profile } from './profile.entity';
 import { Role } from '@/modules/role/role.entity';
+import { Share } from '@/utils/share';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Profile, Role])],
+  imports: [TypeOrmModule.forFeature([User, Profile, Role]), Share],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

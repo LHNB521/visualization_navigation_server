@@ -11,7 +11,6 @@ export class Response<T> implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<Data<T>> | Promise<Observable<any>> {
-    // const req: any = context.switchToHttp().getRequest();
     return next.handle().pipe(
       map((result) => {
         return {
