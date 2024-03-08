@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param {*} payload
    */
   async validate(request: Request, payload: any) {
-    const token = (request.headers as any).authorization.slice(7);
+    const token = (request.headers as any).authorization?.split(' ')[1];
     await this.authService.validateToken(payload, token);
     return {
       userId: payload.userId,

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { JwtGuard, PreviewGuard } from '@/common/guards';
+import { AdminGuard, JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
 import { AuthService } from './auth.service';
 import * as svgCaptcha from 'svg-captcha';
 import { ChangePasswordDto } from './dto/dto';
@@ -8,6 +8,9 @@ import { Result } from '@/common/result';
 import { RedisService } from '../redis/redis.service';
 import { User } from '@/modules/user/entities/user.entity';
 import { registerError } from '@/common/exceptions/custom.exception';
+import { Public } from '@/common/decorators/public.decorator';
+import { LocalGuard } from '@/common/guards/local.guard';
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -16,7 +19,9 @@ export class AuthController {
     private readonly redisService: RedisService,
   ) {}
 
-  @Post('login')
+  @Post('/login')
+  @Public()
+  @UseGuards(LocalGuard)
   async login(@Body() userInfo: User | any) {
     const { username, password, captcha } = userInfo;
     const arrVal = [];
@@ -40,7 +45,8 @@ export class AuthController {
 
   // 获取验证码
   //利用svg-captcha生成校验码图片并存储在前端session中
-  @Get('captcha')
+  @Get('/captcha')
+  @UseGuards(JwtGuard, RoleGuard, AdminGuard)
   createCaptcha(@Req() req: any, @Res() res: any) {
     const captcha = svgCaptcha.createMathExpr({
       size: 4,
@@ -64,11 +70,10 @@ export class AuthController {
   }
 
   // 退出登录
-  @UseGuards(JwtGuard)
-  @Post('logout')
-  async logout(@Body() body: any) {
-    console.log(body);
-    return this.authService.logout(body.userId);
+  @Post('/logout')
+  async logout(@Req() req: any) {
+    const { userId } = req.user;
+    return this.authService.logout(userId);
   }
 
   // 修改密码
