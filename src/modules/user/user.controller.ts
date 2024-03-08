@@ -19,7 +19,7 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import { JwtGuard, PreviewGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto/dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { RoleGuard, AdminGuard } from '@/common/guards';
+import { RoleGuard, ApiGuard } from '@/common/guards';
 import { Result } from '@/common/result';
 
 @ApiTags('用户管理')
@@ -29,7 +29,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  @UseGuards(JwtGuard, RoleGuard, AdminGuard)
+  @UseGuards(JwtGuard, RoleGuard, ApiGuard)
   addUser(@Body() user: CreateUserDto) {
     // return this.userService.create(user);
   }
@@ -39,11 +39,9 @@ export class UserController {
   @Roles('SUPER_ADMIN')
   deleteUser(@Param('id') id: number, @Request() req: any) {
     const currentUser = req.user;
-
     if (currentUser.id === id) {
       throw new CustomException(ErrorCode.ERR_11006, '非法操作，不能删除自己！');
     }
-
     return this.userService.remove(id);
   }
 

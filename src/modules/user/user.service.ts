@@ -114,14 +114,13 @@ export class UserService {
 
   // 根据用户名查询用户信息
   async findByUsername(username: string) {
-    // return this.userRepository.findOne({
-    //   where: { username },
-    //   select: ['id', 'username', 'password', 'enable'],
-    //   relations: {
-    //     profile: true,
-    //     roles: true,
-    //   },
-    // });
+    return this.userRepository.findOne({
+      where: { username },
+      select: ['id', 'username', 'password', 'enable'],
+      relations: {
+        userRole: true,
+      },
+    });
   }
 
   // 是否存在用户
@@ -137,7 +136,7 @@ export class UserService {
     return res;
   }
 
-  // 重置密码
+  // 修改密码
   async resetPassword(id: number, password: string) {
     const user = await this.userRepository.findOne({ where: { id } });
     user.password = hashSync(password);

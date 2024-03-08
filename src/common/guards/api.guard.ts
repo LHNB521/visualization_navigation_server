@@ -3,7 +3,7 @@ import { RedisService } from '@/modules/redis/redis.service';
 import { loginError, resourcePermission } from '../exceptions/custom.exception';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class ApiGuard implements CanActivate {
   constructor(private readonly redisService: RedisService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -11,6 +11,7 @@ export class AdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const path = req.route.path;
     const method = req.method;
+
     // admin跳过权限验证
     if (req.user.currentRoleCode === 'SUPER_ADMIN') return true;
 

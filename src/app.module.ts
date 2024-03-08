@@ -10,7 +10,7 @@ import { RedisModule } from '@/modules/redis/redis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtMiddleware } from './middleware/jwt.middleware';
 import { LoggerMiddleware } from './middleware/logger.middleware';
-import { AdminGuard, JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
+import { ApiGuard, JwtGuard, RoleGuard } from '@/common/guards';
 import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
@@ -56,11 +56,16 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
-    // {
-    //   // 权限验证
-    //   provide: APP_GUARD,
-    //   useClass: PermissionAuthGuard,
-    // },
+    {
+      // 接口权限验证
+      provide: APP_GUARD,
+      useClass: ApiGuard,
+    },
+    {
+      // 角色权限验证
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

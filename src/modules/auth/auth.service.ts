@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, compareSync } from 'bcryptjs';
 import { UserService } from '@/modules/user/user.service';
 import { RedisService } from '@/modules/redis/redis.service';
 import { RoleMenuService } from '../role-menu/role-menu.service';
@@ -28,7 +28,6 @@ export class AuthService {
     const userinfo: any = await this.userService.isExistUser(username);
     // 判断密码是否一致
     const flag = await compare(password, userinfo.password);
-
     if (userinfo && flag) {
       // 获取菜单
       const { menu, resource } = await this.getPermission(userinfo.userRole.id);
@@ -66,6 +65,7 @@ export class AuthService {
     return { menu, resource };
   }
 
+  // 登出
   logout(userId: number) {
     if (userId) {
       this.redisService.delValue(`user_access_token:${userId}`);
@@ -90,5 +90,15 @@ export class AuthService {
       throw new tokenError('登录状态已过期！');
     }
     return true;
+  }
+
+  // 密码验证用户
+  async validateUser(username: string, password: string) {
+    const user: any = await this.userService.findByUsername(username);
+    if (user && compareSync(password, user.password)) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 }
