@@ -11,6 +11,9 @@ export class AdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const path = req.route.path;
     const method = req.method;
+    // admin跳过权限验证
+    if (req.user.currentRoleCode === 'SUPER_ADMIN') return true;
+
     const data = JSON.parse(await this.redisService.getValue(`user:${req.user.userId}`));
     if (data == null) throw new loginError('请登录');
     const resource = data.resource;

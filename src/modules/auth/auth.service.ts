@@ -8,7 +8,8 @@ import { RoleResourceService } from '../role-resource/role-resource.service';
 import { MenuService } from '../menu/menu.service';
 import getMenuList from '@/utils/getMenuList';
 import { ResourceService } from '../resource/resource.service';
-import { loginError } from '@/common/exceptions/custom.exception';
+import { loginError, tokenError } from '@/common/exceptions/custom.exception';
+import { ACCESS_TOKEN_EXPIRATION_TIME } from './constants';
 @Injectable()
 export class AuthService {
   constructor(
@@ -43,7 +44,11 @@ export class AuthService {
         userId: userinfo.id,
         currentRoleCode: userinfo?.userRole?.code,
       });
-      console.log(userinfo.username, userinfo.id, userinfo?.userRole?.code);
+      this.redisService.setValue(
+        `user_access_token:${userinfo.id}`,
+        token,
+        ACCESS_TOKEN_EXPIRATION_TIME,
+      );
       delete userinfo.password;
       userinfo.menus = menu;
       return { userinfo, token };
@@ -67,5 +72,23 @@ export class AuthService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * 校验token
+   * @param {number} payload 用户
+   * @param {string} token
+   * @return {boolean}
+   */
+  async validateToken(payload: any, token: string): Promise<boolean> {
+    const user = this.userService.isExistUser(payload.userId);
+    if (!user) {
+      throw new tokenError('用户认证失败！');
+    }
+    const cacheToken = await this.redisService.getValue(`user_access_token:${payload.userId}`);
+    if (!cacheToken || token !== cacheToken) {
+      throw new tokenError('登录状态已过期！');
+    }
+    return true;
   }
 }
