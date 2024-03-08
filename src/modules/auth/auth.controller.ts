@@ -21,7 +21,6 @@ export class AuthController {
 
   @Post('/login')
   @Public()
-  @UseGuards(LocalGuard)
   async login(@Body() userInfo: User | any) {
     const { username, password, captcha } = userInfo;
     const arrVal = [];
@@ -46,6 +45,7 @@ export class AuthController {
   // 获取验证码
   //利用svg-captcha生成校验码图片并存储在前端session中
   @Get('/captcha')
+  @Public()
   @UseGuards(JwtGuard, RoleGuard, AdminGuard)
   createCaptcha(@Req() req: any, @Res() res: any) {
     const captcha = svgCaptcha.createMathExpr({
