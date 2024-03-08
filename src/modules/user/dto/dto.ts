@@ -53,6 +53,9 @@ export class CreateUserDto {
 
 export class GetUserDto {
   @Allow()
+  nickname?: string;
+
+  @Allow()
   pageSize?: number;
 
   @Allow()

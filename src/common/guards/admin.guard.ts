@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { RedisService } from '@/modules/redis/redis.service';
-import { loginError, resourcePermission } from '../exception';
+import { loginError, resourcePermission } from '../exceptions/custom.exception';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -12,8 +12,6 @@ export class AdminGuard implements CanActivate {
     const path = req.route.path;
     const method = req.method;
     const data = JSON.parse(await this.redisService.getValue(`user:${req.user.userId}`));
-    console.log(data);
-
     if (data == null) throw new loginError('请登录');
     const resource = data.resource;
     for (let i = 0; i < resource.length; i++) {

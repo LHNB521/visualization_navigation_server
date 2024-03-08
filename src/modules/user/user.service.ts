@@ -66,47 +66,35 @@ export class UserService {
     return true;
   }
 
-  // 根据查询所有用户信息
-  async findAll(query: GetUserDto) {
-    // const pageSize = query.pageSize || 10;
-    // const pageNum = query.pageNum || 1;
-    // const [users, total] = await this.userRepository.findAndCount({
-    //   select: {
-    //     profile: {
-    //       gender: true,
-    //       avatar: true,
-    //       email: true,
-    //       address: true,
-    //       nickName: true,
-    //     },
-    //     roles: true,
-    //   },
-    //   relations: {
-    //     profile: true,
-    //     roles: true,
-    //   },
-    //   where: {
-    //     username: Like(`%${query.username || ''}%`),
-    //     enable: query.enable || undefined,
-    //     profile: {
-    //       gender: query.gender || undefined,
-    //     },
-    //   },
-    //   order: {
-    //     createTime: 'ASC',
-    //   },
-    //   take: pageSize,
-    //   skip: (pageNum - 1) * pageSize,
-    // });
-    // const rows = users.map((item: any) => {
-    //   const newItem = {
-    //     ...item,
-    //     ...item.profile,
-    //   };
-    //   delete newItem.profile;
-    //   return newItem;
-    // });
-    // return { rows, total };
+  // 查询所有用户信息
+  findAll() {
+    const data = this.userRepository.find();
+    return data;
+  }
+
+  // 查询用户
+  async findAllByPage(query: GetUserDto) {
+    const pageSize = query.pageSize || 10;
+    const pageNum = query.pageNum || 1;
+    const [users, total] = await this.userRepository.findAndCount({
+      // select: {
+      //   userRole: true,
+      // },
+      relations: {
+        userRole: true,
+      },
+      where: {
+        username: Like(`%${query.username || ''}%`),
+        nickname: Like(`%${query.nickname || ''}%`),
+        enable: query.enable || undefined,
+      },
+      order: {
+        createTime: 'ASC',
+      },
+      take: pageSize,
+      skip: (pageNum - 1) * pageSize,
+    });
+    return { records: users, total, pageSize, pageNum };
   }
 
   // 根据用户id查询用户详情
@@ -121,7 +109,6 @@ export class UserService {
     const menuIds = await this.roleMenuService.findIdByRoleId(roleId);
     const menu = getMenuList(await this.menuService.getMenuByIds(menuIds));
     data.menus = menu;
-    console.log(data);
     return { userinfo: data };
   }
 

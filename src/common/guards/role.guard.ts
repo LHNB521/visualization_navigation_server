@@ -15,6 +15,7 @@ export class RoleGuard implements CanActivate {
     if (!roles?.length) return true;
     // 当前角色在不可操作角色范围内
     if (!roles.includes(currentRoleCode)) throw new CustomException(ErrorCode.ERR_11003);
+    console.log(user);
     return true;
   }
 }

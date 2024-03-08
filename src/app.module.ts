@@ -49,18 +49,16 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     // 异常日志模块
     ExceptionLogModule,
   ],
-  providers: [JwtMiddleware, LoggerMiddleware],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    console.log('AppModule configure', consumer);
-    consumer.apply(JwtMiddleware).forRoutes('*'); //解析请求的token
-    // consumer.apply(LoggerMiddleware).forRoutes(
-    //   { path: '*', method: RequestMethod.POST },
-    //   {
-    //     path: '*',
-    //     method: RequestMethod.DELETE,
-    //   },
-    // );
+    consumer.apply(JwtMiddleware).forRoutes({ path: '/user/create', method: RequestMethod.ALL }); //解析请求的token
+    consumer.apply(LoggerMiddleware).forRoutes(
+      { path: '*', method: RequestMethod.POST },
+      {
+        path: '*',
+        method: RequestMethod.DELETE,
+      },
+    );
   }
 }

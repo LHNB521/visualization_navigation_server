@@ -25,7 +25,6 @@ export class HttpFilter implements ExceptionFilter {
     exceptionLog.requestParam = objectToString(request.params);
 
     if (!path.includes('/socket.io/?EIO=')) await this.exceptionLogService.create(exceptionLog);
-
     response.status(status).json({
       success: false,
       time: new Date(),

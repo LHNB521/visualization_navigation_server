@@ -19,21 +19,19 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import { JwtGuard, PreviewGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto/dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { AdminGuard } from '@/common/guards/admin.guard';
+import { RoleGuard, AdminGuard } from '@/common/guards';
 import { Result } from '@/common/result';
 
 @ApiTags('用户管理')
 @ApiBearerAuth()
 @Controller('user')
-@UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  @UseGuards(JwtGuard, AdminGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(JwtGuard, RoleGuard, AdminGuard)
   addUser(@Body() user: CreateUserDto) {
-    return this.userService.create(user);
+    // return this.userService.create(user);
   }
 
   @Delete('delete/:id')
@@ -53,8 +51,8 @@ export class UserController {
   @ApiOperation({ summary: '获取所有用户信息' })
   @ApiOkResponse({ type: GetUserDto })
   @Get('list')
-  getAllUsers(@Query() queryDto: GetUserDto) {
-    return this.userService.findAll(queryDto);
+  async findAll() {
+    return new Result(await this.userService.findAll());
   }
 
   // 获取当前登录用户详情
@@ -63,6 +61,11 @@ export class UserController {
     const userId = res.user.userId;
     const data = await this.userService.findUserDetail(userId);
     return new Result(data);
+  }
+
+  @Get('page')
+  async findAllByPage(@Query() queryDto: GetUserDto) {
+    return new Result(await this.userService.findAllByPage(queryDto));
   }
 
   // 管理员重置密码

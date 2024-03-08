@@ -2,7 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { jwtConstants } from '@/modules/auth/constants';
-import { tokenError } from '../common/exception';
+import { tokenError } from '../common/exceptions/custom.exception';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
@@ -12,8 +12,9 @@ export class JwtMiddleware implements NestMiddleware {
       try {
         const decodedToken: any = jwt.verify(token, jwtConstants.secret);
         req.user = {
-          userId: decodedToken.sub,
+          userId: decodedToken.userId,
           username: decodedToken.username,
+          currentRoleCode: decodedToken.currentRoleCode,
         };
       } catch (error) {
         throw new tokenError('token过期或token错误，请重新登录');

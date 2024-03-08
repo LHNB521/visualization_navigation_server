@@ -1,26 +1,21 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtGuard, LocalGuard, PreviewGuard } from '@/common/guards';
+import { JwtGuard, PreviewGuard } from '@/common/guards';
 import { AuthService } from './auth.service';
-import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
 import * as svgCaptcha from 'svg-captcha';
 import { ChangePasswordDto } from './dto/dto';
 import { UserService } from '@/modules/user/user.service';
 import { Result } from '@/common/result';
 import { RedisService } from '../redis/redis.service';
-// import { ReturnType } from '@/common/decorators/return-type.decorator';
 import { User } from '@/modules/user/entities/user.entity';
-import { registerError } from '@/common/exception';
+import { registerError } from '@/common/exceptions/custom.exception';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private userService: UserService,
-    private configService: ConfigService,
     private readonly redisService: RedisService,
   ) {}
 
-  // @UseGuards(LocalGuard)
   @Post('login')
   async login(@Body() userInfo: User | any) {
     const { username, password, captcha } = userInfo;
@@ -69,11 +64,11 @@ export class AuthController {
   }
 
   // 退出登录
-  @Post('logout')
   @UseGuards(JwtGuard)
-  async logout(@Req() req: any) {
-    console.log(req.user);
-    return this.authService.logout(req.user);
+  @Post('logout')
+  async logout(@Body() body: any) {
+    console.log(body);
+    return this.authService.logout(body.userId);
   }
 
   // 修改密码
