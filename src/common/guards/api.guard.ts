@@ -8,14 +8,15 @@ export class ApiGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // 获取请求对象
-    const req = context.switchToHttp().getRequest();
-    const path = req.route.path;
-    const method = req.method;
+    const request = context.switchToHttp().getRequest();
+    const { user } = request;
+    const path = request.route.path;
+    const method = request.method;
 
     // admin跳过权限验证
-    if (req.user.currentRoleCode === 'SUPER_ADMIN') return true;
+    if (user.currentRoleCode === 'SUPER_ADMIN') return true;
 
-    const data = JSON.parse(await this.redisService.getValue(`user:${req.user.userId}`));
+    const data = JSON.parse(await this.redisService.getValue(`user:${user.userId}`));
     if (data == null) throw new loginError('请登录');
     const resource = data.resource;
     for (let i = 0; i < resource.length; i++) {

@@ -101,4 +101,9 @@ export class AuthService {
     }
     return null;
   }
+
+  // 生成token
+  generateToken(payload: any) {
+    console.log(payload);
+  }
 }

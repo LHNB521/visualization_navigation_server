@@ -6,3 +6,6 @@ export const PUBLIC_KEY = 'public';
 
 // 权限验证
 export const PERMISSION_KEY = 'permission';
+
+// 超级管理员
+export const ROLES_KEY = 'roles';

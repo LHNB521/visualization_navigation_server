@@ -1,4 +1,4 @@
-import { JwtGuard, PreviewGuard, RoleGuard } from '@/common/guards';
+import { JwtGuard, PreviewGuard } from '@/common/guards';
 import {
   Body,
   Controller,
@@ -22,7 +22,7 @@ import {
 import { Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('role')
-@UseGuards(JwtGuard, RoleGuard)
+@UseGuards(JwtGuard)
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 

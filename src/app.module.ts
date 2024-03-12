@@ -10,8 +10,6 @@ import { RedisModule } from '@/modules/redis/redis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtMiddleware } from './middleware/jwt.middleware';
 import { LoggerMiddleware } from './middleware/logger.middleware';
-import { ApiGuard, JwtGuard, RoleGuard } from '@/common/guards';
-import { APP_GUARD } from '@nestjs/core';
 @Module({
   imports: [
     // 配置文件模块

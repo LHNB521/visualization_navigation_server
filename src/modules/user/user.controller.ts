@@ -19,7 +19,7 @@ import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception
 import { JwtGuard, PreviewGuard } from '@/common/guards';
 import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto/dto';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { RoleGuard, ApiGuard } from '@/common/guards';
+import { RoleGuard } from '@/common/guards';
 import { Result } from '@/common/result';
 
 @ApiTags('用户管理')
@@ -29,8 +29,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  @UseGuards(JwtGuard, RoleGuard, ApiGuard)
+  @UseGuards(JwtGuard, RoleGuard)
+  @Roles('SUPER_ADMIN')
   addUser(@Body() user: CreateUserDto) {
+    console.log(user);
     // return this.userService.create(user);
   }
 
@@ -68,7 +70,6 @@ export class UserController {
 
   // 管理员重置密码
   @Patch('password/reset/:userId')
-  @Roles('SUPER_ADMIN')
   @UseGuards(PreviewGuard)
   resetPassword(@Param('userId') userId: number, @Body() dto: UpdatePasswordDto) {
     return this.userService.resetPassword(userId, dto.password);

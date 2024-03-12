@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
+import { ROLES_KEY } from '../constants/decorator.constant';
 
-export const Roles = (...roles: string[]) => {
-  return SetMetadata('roles', roles);
-};
+// 超级管理员注解
+export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);

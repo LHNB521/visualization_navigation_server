@@ -8,8 +8,10 @@ import { RedisService } from '../redis/redis.service';
 import { User } from '@/modules/user/entities/user.entity';
 import { CustomException, ErrorCode, registerError } from '@/common/exceptions/custom.exception';
 import { Public } from '@/common/decorators/public.decorator';
+import { JwtGuard } from '@/common/guards';
 
 @Controller('auth')
+@UseGuards(JwtGuard)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -17,6 +19,7 @@ export class AuthController {
     private readonly redisService: RedisService,
   ) {}
 
+  // 登录
   @Post('/login')
   @Public()
   async login(@Body() userInfo: User | any) {
@@ -35,7 +38,6 @@ export class AuthController {
       }
     }
     if (!flag) throw new registerError('验证码有误');
-
     const data = await this.authService.login(username, password);
     return new Result(data);
   }
@@ -86,5 +88,11 @@ export class AuthController {
     // 修改密码后退出登录
     this.authService.logout(req.user.userId);
     return true;
+  }
+
+  // 刷新token
+  @Get('refresh/token')
+  async refreshToken(@Req() req: any) {
+    return this.authService.generateToken(req.user);
   }
 }
