@@ -50,23 +50,6 @@ import { APP_GUARD } from '@nestjs/core';
     // 异常日志模块
     ExceptionLogModule,
   ],
-  providers: [
-    {
-      // JWT身份验证
-      provide: APP_GUARD,
-      useClass: JwtGuard,
-    },
-    {
-      // 接口权限验证
-      provide: APP_GUARD,
-      useClass: ApiGuard,
-    },
-    {
-      // 角色权限验证
-      provide: APP_GUARD,
-      useClass: RoleGuard,
-    },
-  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
