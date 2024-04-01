@@ -10,6 +10,7 @@ import { RedisModule } from '@/modules/redis/redis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtMiddleware } from './middleware/jwt.middleware';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { SharedModule } from './modules/shared/shared.module';
 @Module({
   imports: [
     // 配置文件模块
@@ -45,6 +46,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     AuthModule,
     // Redis模块
     RedisModule,
+    SharedModule,
     // 异常日志模块
     ExceptionLogModule,
   ],

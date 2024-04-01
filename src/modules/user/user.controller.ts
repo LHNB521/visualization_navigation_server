@@ -10,6 +10,7 @@ import {
   Req,
   Request,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -21,6 +22,12 @@ import { GetUserDto, CreateUserDto, UpdatePasswordDto } from './dto/dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { RoleGuard } from '@/common/guards';
 import { Result } from '@/common/result';
+import { PaginationPipe } from '@/common/pipes/pagination.pipe';
+import { PaginatedDto } from '@/common/dtos/paginated.dto';
+import { PageQueryDto } from './dto/request.dto';
+import { UserDto } from './dto/response.dto';
+import { ApiResultResponse } from '@/common/decorators/api-result-response.decorator';
+import { Permission } from '@/common/decorators/permission.decorator';
 
 @ApiTags('用户管理')
 @ApiBearerAuth()
@@ -63,9 +70,17 @@ export class UserController {
     return new Result(data);
   }
 
+  /**
+   * 分页获取用户列表
+   */
+  @ApiOperation({ summary: '分页获取用户列表' })
+  @ApiResultResponse(UserDto, { isPage: true })
   @Get('page')
-  async findAllByPage(@Query() queryDto: GetUserDto) {
-    return new Result(await this.userService.findAllByPage(queryDto));
+  @Permission('system:user:query')
+  @UsePipes(PaginationPipe)
+  async getUserListByPage(@Query() query: PageQueryDto): Promise<PaginatedDto<UserDto>> {
+    // return await this.userService.getUserListByPage(query);
+    return;
   }
 
   // 管理员重置密码

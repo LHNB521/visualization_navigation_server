@@ -9,14 +9,18 @@ import { Role } from '../role/role.entity';
 import { RoleMenuService } from '../role-menu/role-menu.service';
 import { MenuService } from '../menu/menu.service';
 import getMenuList from '@/utils/getMenuList';
+import { PageQueryDto } from './dto/request.dto';
+import { UtilsService } from '../shared/utils.service';
 
 @Injectable()
 export class UserService {
   constructor(
+    // private readonly prisma: PrismaService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly roleMenuService: RoleMenuService,
     private readonly menuService: MenuService,
+    private readonly utils: UtilsService,
     // @InjectRepository(Role)
     // private roleRepo: Repository<Role>,
   ) {}
@@ -73,28 +77,84 @@ export class UserService {
   }
 
   // 查询用户
-  async findAllByPage(query: GetUserDto) {
-    const pageSize = query.pageSize || 10;
-    const pageNum = query.pageNum || 1;
-    const [users, total] = await this.userRepository.findAndCount({
-      // select: {
-      //   userRole: true,
-      // },
-      relations: {
-        userRole: true,
-      },
-      where: {
-        username: Like(`%${query.username || ''}%`),
-        nickname: Like(`%${query.nickname || ''}%`),
-        enable: query.enable || undefined,
-      },
-      order: {
-        createTime: 'ASC',
-      },
-      take: pageSize,
-      skip: (pageNum - 1) * pageSize,
-    });
-    return { records: users, total, pageSize, pageNum };
+  async getUserListByPage({
+    skip,
+    take,
+    username = '',
+    nickname = '',
+    status = '',
+    departmentId = '',
+    roleId = '',
+  }: PageQueryDto = {}) {
+    // 查询参数
+    const whereQuery = {
+      AND: [
+        {
+          isDelete: false,
+        },
+        {
+          username: this.utils.isEmpty(username) ? undefined : { contains: username },
+        },
+        {
+          nickname: this.utils.isEmpty(nickname) ? undefined : { contains: nickname },
+        },
+        {
+          status: this.utils.isEmpty(status) ? undefined : parseInt(status),
+        },
+        {
+          userRole: this.utils.isEmpty(roleId) ? undefined : { some: { roleId: parseInt(roleId) } },
+        },
+      ],
+    };
+
+    // 部门查询参数
+    // const deptQuery: any = {
+    //   departmentId: undefined,
+    // };
+    // if (!this.utils.isEmpty(departmentId)) {
+    //   // 获取所有部门
+    //   const parseDeptId = parseInt(departmentId);
+    //   const allDeptList = await this.departmentService.getDeptList();
+    //   // 获取当前部门所有子孙部门id
+    //   const childDepartmentIds = [parseDeptId, ...findChildDepartments(parseDeptId, allDeptList)];
+    //   deptQuery.departmentId = {
+    //     in: childDepartmentIds,
+    //   };
+    // }
+
+    // whereQuery.AND.push(deptQuery);
+
+    // const users = await this.prisma.user.findMany({
+    //   take,
+    //   skip,
+    //   where: whereQuery,
+    //   include: {
+    //     department: true,
+    //     userRole: {
+    //       include: {
+    //         role: true,
+    //       },
+    //     },
+    //   },
+    //   orderBy: [
+    //     {
+    //       createTime: 'desc',
+    //     },
+    //   ],
+    // });
+
+    // const list = users.map((item) => {
+    //   let user: any = Object.assign({}, item);
+    //   user.roles = (user.userRole || []).map((ur) => ur.role);
+    //   user = omit(user, ['isDelete', 'userRole', 'password']);
+    //   return user;
+    // });
+
+    // const count = await this.prisma.user.count({ where: whereQuery });
+    return {
+      // list,
+      // total: count,
+    };
   }
 
   // 根据用户id查询用户详情
