@@ -13,8 +13,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // async validate(username: string, password: string): Promise<any> {
-  //   const user = await this.authService.validateUser(username, password);
-  //   return user; //返回值会被 守卫的  handleRequest方法 捕获
-  // }
+  async validate(username: string, password: string): Promise<any> {
+    const user = await this.authService.validateUser(username, password);
+    return user; //返回值会被 守卫的  handleRequest方法 捕获
+  }
 }

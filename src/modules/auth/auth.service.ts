@@ -1,21 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { compare, compareSync } from 'bcryptjs';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+// import { JwtService } from '@nestjs/jwt';
+// import { compare, compareSync } from 'bcryptjs';
 import { UserService } from '@/modules/user/user.service';
-import { RedisService } from '@/modules/redis/redis.service';
+// import { RedisService } from '@/modules/redis/redis.service';
 import { RoleMenuService } from '../role-menu/role-menu.service';
 import { RoleResourceService } from '../role-resource/role-resource.service';
 import { MenuService } from '../menu/menu.service';
 import getMenuList from '@/utils/getMenuList';
 import { ResourceService } from '../resource/resource.service';
 import { loginError, tokenError } from '@/common/exceptions/custom.exception';
-import { ACCESS_TOKEN_EXPIRATION_TIME } from './constants';
+// import { ACCESS_TOKEN_EXPIRATION_TIME } from './auth.constant';
+import { ApiException } from '@/common/exceptions/api-exception';
+import { BcryptService } from '../shared/bcrypt.service';
+import { USER_TOKEN_KEY } from '@/common/constants/redis.contant';
+import { RedisService } from '../redis/redis.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
-    private jwtService: JwtService,
-    private redisService: RedisService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    private readonly bctyptService: BcryptService,
+    private readonly redisSerivce: RedisService,
+    // private jwtService: JwtService,
+    // private redisService: RedisService,
     private readonly roleMenuService: RoleMenuService,
     private readonly roleResourceService: RoleResourceService,
     private readonly menuService: MenuService,
@@ -76,30 +83,42 @@ export class AuthService {
 
   /**
    * 校验token
-   * @param {number} payload 用户
+   * @param {number} userId 用户id
    * @param {string} token
    * @return {boolean}
    */
-  async validateToken(payload: any, token: string): Promise<boolean> {
-    // const user = this.userService.isExistUser(payload.userId);
-    // if (!user) {
-    //   throw new tokenError('用户认证失败！');
-    // }
-    // const cacheToken = await this.redisService.getValue(`user_access_token:${payload.userId}`);
-    // if (!cacheToken || token !== cacheToken) {
-    //   throw new tokenError('登录状态已过期！');
-    // }
+  async validateToken(userId: number, token: any) {
+    const user = this.userService.getUserById(userId);
+    if (!user) {
+      throw new ApiException('用户认证失败！', 401);
+    }
+    const cacheToken = await this.redisSerivce.get(`${USER_TOKEN_KEY}:${userId}`);
+    if (!cacheToken || token !== cacheToken) {
+      throw new ApiException('登录状态已过期！', 401);
+    }
     return true;
   }
 
-  // 密码验证用户
+  /**
+   * 校验用户信息
+   * @param {string} username
+   * @param {string} password
+   * @return {*}
+   */
   async validateUser(username: string, password: string) {
-    // const user: any = await this.userService.findByUsername(username);
-    // if (user && compareSync(password, user.password)) {
-    //   const { password, ...result } = user;
-    //   return result;
-    // }
-    return null;
+    const user = await this.userService.getUserByUsername(username);
+    if (!user) throw new ApiException('用户不存在！');
+    if (!(await this.bctyptService.compare(password, user.password)))
+      throw new ApiException('密码错误!');
+    return user;
+  }
+
+  /**
+   * 移除token
+   * @param {number} userId
+   */
+  removeToken(userId: number) {
+    this.redisSerivce.del(`${USER_TOKEN_KEY}:${userId}`);
   }
 
   // 生成token

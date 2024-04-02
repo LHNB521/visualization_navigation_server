@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SexEnum, StatusEnum } from '../utils';
 
+// 登录
+export class LoginResDto {
+  token: string;
+}
+
 export class UserDto {
   @ApiProperty({ description: 'ID' })
   id: number;
@@ -35,4 +40,14 @@ export class UserDto {
 
   @ApiProperty({ description: '编辑时间' })
   updateTime: Date;
+}
+
+// 当前系统用户信息
+export class CurrentUserDto extends UserDto {
+  @ApiProperty({
+    description: '权限标识集合',
+    type: 'array',
+    items: { type: 'string' },
+  })
+  permissions: string[];
 }

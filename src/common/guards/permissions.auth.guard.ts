@@ -23,7 +23,6 @@ export class PermissionAuthGuard implements CanActivate {
       context.getClass(),
     ]);
     let result = false;
-
     if (!permissionData || permissionData.permissions.length === 0) return true;
 
     const request = context.switchToHttp().getRequest();
@@ -31,7 +30,6 @@ export class PermissionAuthGuard implements CanActivate {
 
     // admin跳过权限验证
     if (userId === ADMIN_USER_ID) return true;
-
     // 用户权限code集合
     let userPermissionCodes = [];
     const cachePermissionsStr = await this.redis.get(`${USER_PERMISSION_KEY}:${userId}`);

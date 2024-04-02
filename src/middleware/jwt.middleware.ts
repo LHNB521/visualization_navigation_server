@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { jwtConstants } from '@/modules/auth/constants';
+import { jwtConstants } from '@/modules/auth/auth.constant';
 import { tokenError } from '../common/exceptions/custom.exception';
 
 @Injectable()

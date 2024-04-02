@@ -1,32 +1,24 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
-import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { RedisModule } from '../redis/redis.module';
-import { jwtConstants } from './constants';
-import { RoleMenuModule } from '../role-menu/role-menu.module';
-import { RoleResourceModule } from '../role-resource/role-resource.module';
-import { MenuModule } from '../menu/menu.module';
-import { ResourceModule } from '../resource/resource.module';
+import { jwtConstants } from './auth.constant';
 import { UserModule } from '../user/user.module';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './strategies/local.strategy';
 @Module({
   imports: [
-    UserModule,
-    PassportModule,
-    RedisModule,
-    RoleMenuModule,
-    RoleResourceModule,
-    MenuModule,
-    ResourceModule,
+    forwardRef(() => UserModule),
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+    }),
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '5d' },
+      // signOptions: { expiresIn: '24h' } // 用redis管理token的过期时间
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  controllers: [],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

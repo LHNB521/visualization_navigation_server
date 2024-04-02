@@ -28,11 +28,23 @@ import { UserService } from './user.service';
 // import { UserDto } from './dto/response.dto';
 // import { ApiResultResponse } from '@/common/decorators/api-result-response.decorator';
 // import { Permission } from '@/common/decorators/permission.decorator';
+import { ApiResultResponse } from 'src/common/decorators/api-result-response.decorator';
+import { CurrentUserDto } from './dto/response.dto';
 
 @ApiTags('用户管理')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  /**
+   * 获取当前系统用户信息
+   */
+  @ApiOperation({ summary: '获取当前系统用户信息' })
+  @ApiResultResponse(CurrentUserDto)
+  @Get('/info')
+  async getCurrentUserInfo(@Req() req: any): Promise<CurrentUserDto> {
+    return await this.userService.getCurrentUserInfo(req.user.userId);
+  }
 
   // @Post('create')
   // // @UseGuards(JwtGuard, RoleGuard)

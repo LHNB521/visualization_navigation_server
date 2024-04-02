@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 // import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,9 +6,11 @@ import { UserController } from './user.controller';
 // import { Share } from '@/utils/share';
 // import { RoleMenuModule } from '../role-menu/role-menu.module';
 // import { MenuModule } from '../menu/menu.module';
+import { AuthModule } from '../auth/auth.module';
+import { BaseController } from './base.controller';
 @Module({
-  // imports: [forwardRef(() => AuthModule)],
-  controllers: [UserController],
+  imports: [forwardRef(() => AuthModule)],
+  controllers: [UserController, BaseController],
   providers: [UserService],
   exports: [UserService],
 })

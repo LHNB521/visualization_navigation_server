@@ -239,7 +239,6 @@ export class UserService {
    */
   async getCurrentUserInfo(id: number) {
     const userInfo = await this.getUserDetailById(id);
-    console.log(userInfo);
 
     // const roleIds = userInfo.roles.map((item) => item.id);
 
@@ -255,5 +254,29 @@ export class UserService {
     // this.redis.set(`${USER_PERMISSION_KEY}:${id}`, JSON.stringify(permissionCodes));
 
     return userInfo;
+  }
+
+  /**
+   * 通过username获取用户信息
+   * @param {String} username
+   */
+  async getUserByUsername(username: string) {
+    return await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+  }
+
+  /**
+   * 通过id获取用户信息
+   * @param {Number} id
+   */
+  async getUserById(id: number) {
+    return await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 }
