@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Prisma } from '@prisma/client';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class BaseService {
@@ -10,7 +10,7 @@ export class BaseService {
    * 登录
    * @param {User} user
    */
-  async login(user: Prisma.UserSelect) {
+  async login(user: User) {
     const payload = { userId: user.id };
     return this.authService.generateToken(payload);
   }

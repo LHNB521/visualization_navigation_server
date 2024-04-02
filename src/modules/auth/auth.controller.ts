@@ -1,12 +1,9 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as svgCaptcha from 'svg-captcha';
-import { ChangePasswordDto } from './dto/dto';
 import { UserService } from '@/modules/user/user.service';
 import { Result } from '@/common/result';
 import { RedisService } from '../redis/redis.service';
-import { User } from '@/modules/user/entities/user.entity';
-import { CustomException, ErrorCode, registerError } from '@/common/exceptions/custom.exception';
 import { Public } from '@/common/decorators/public.decorator';
 import { JwtGuard } from '@/common/guards';
 
@@ -15,32 +12,9 @@ import { JwtGuard } from '@/common/guards';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private userService: UserService,
-    private readonly redisService: RedisService,
+    // private userService: UserService,
+    // private readonly redisService: RedisService,
   ) {}
-
-  // 登录
-  @Post('/login')
-  @Public()
-  async login(@Body() userInfo: User | any) {
-    // const { username, password, captcha } = userInfo;
-    // const arrVal = [];
-    // const keys = await this.redisService.getAllKeys('vis_captcha:*');
-    // for (let i = 0; i < keys.length; i++) {
-    //   const val = await this.redisService.getValue(keys[i]);
-    //   arrVal.push(val);
-    // }
-    // let flag = false;
-    // for (let i = 0; i < arrVal.length; i++) {
-    //   if (captcha?.toLocaleLowerCase() == arrVal[i].toLocaleLowerCase()) {
-    //     flag = true;
-    //     break;
-    //   }
-    // }
-    // if (!flag) throw new registerError('验证码有误');
-    // const data = await this.authService.login(username, password);
-    // return new Result(data);
-  }
 
   // 获取验证码
   //利用svg-captcha生成校验码图片并存储在前端session中
@@ -66,28 +40,6 @@ export class AuthController {
     res.type('image/svg+xml');
     res.send(captcha.data);
     return new Result(captcha.data);
-  }
-
-  // 退出登录
-  @Post('/logout')
-  @Public()
-  async logout(@Req() req: any) {
-    const { userId } = req.user;
-    return this.authService.logout(userId);
-  }
-
-  // 修改密码
-  @Post('password')
-  async changePassword(@Req() req: any, @Body() body: ChangePasswordDto) {
-    const ret = await this.authService.validateUser(req.user.username, body.oldPassword);
-    if (!ret) {
-      throw new CustomException(ErrorCode.ERR_10004);
-    }
-    // 修改密码
-    // await this.userService.resetPassword(req.user.userId, body.newPassword);
-    // 修改密码后退出登录
-    this.authService.logout(req.user.userId);
-    return true;
   }
 
   // 刷新token
