@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ApiResultResponse } from 'src/common/decorators/api-result-response.decorator';
 import { CurrentUserDto, UserDto } from './dto/response.dto';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { PaginationPipe } from '@/common/pipes/pagination.pipe';
-import { CreateUserDto, PageQueryDto, UpdateUserDto } from './dto/request.dto';
+import { ChangeStatusDto, CreateUserDto, PageQueryDto, ResetPasswordDto, UpdateUserDto } from './dto/request.dto';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -56,6 +56,43 @@ export class UserController {
   @Permission('system:user:edit')
   async updateUser(@Body() updateUserDto: UpdateUserDto) {
     await this.userService.updateUser(updateUserDto);
+  }
+
+  /**
+   * 修改用户状态
+   * @param {ChangeStatusDto} changeStatusDto
+   */
+  @ApiOperation({ summary: '用户启用/禁用' })
+  @ApiResultResponse()
+  @Put('change-status')
+  @Permission('system:user:edit')
+  async changeStatus(@Body() changeStatusDto: ChangeStatusDto) {
+    await this.userService.changeStatus(changeStatusDto);
+  }
+
+  /**
+   * 删除用户
+   * @param {number} id
+   */
+  @ApiOperation({ summary: '删除用户' })
+  @ApiParam({ name: 'id', description: 'ID' })
+  @ApiResultResponse()
+  @Delete('/:id')
+  @Permission('system:user:delete')
+  async deleteUser(@Param('id') id: number) {
+    await this.userService.deleteUser(id);
+  }
+
+  /**
+   * 重置密码
+   * @param {ResetPasswordDto} resetPasswordDto
+   */
+  @ApiOperation({ summary: '重置密码' })
+  @ApiResultResponse()
+  @Put('reset-password')
+  @Permission('system:user:resetPassword')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.userService.resetPassword(resetPasswordDto);
   }
 
   /**

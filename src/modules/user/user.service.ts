@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, UpdateUserDto } from './dto/request.dto';
+import { ChangeStatusDto, CreateUserDto, ResetPasswordDto, UpdateUserDto } from './dto/request.dto';
 import { ApiException } from '@/common/exceptions/api-exception';
 import { BcryptService } from '../shared/bcrypt.service';
 import { UtilsService } from '../shared/utils.service';
@@ -262,6 +262,78 @@ export class UserService {
     return await this.prisma.user.findUnique({
       where: {
         id,
+      },
+    });
+  }
+
+  /**
+   * 启用/停用
+   * @param {ChangeStatusDto} changeStatusDto
+   */
+  async changeStatus(changeStatusDto: ChangeStatusDto) {
+    if (this.isAdminUser(changeStatusDto.id)) {
+      throw new ApiException('系统管理员用户不允许修改！');
+    }
+
+    const user = await this.validateUser(changeStatusDto.id);
+
+    if (user.status === changeStatusDto.status) {
+      throw new ApiException('状态参数有误！');
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: changeStatusDto.id,
+      },
+      data: {
+        status: changeStatusDto.status,
+      },
+    });
+  }
+
+  /**
+   * 删除用户
+   * @param {number} id
+   */
+  async deleteUser(id: number) {
+    if (this.isAdminUser(id)) {
+      throw new ApiException('系统管理员用户不允许删除！');
+    }
+
+    await this.validateUser(id);
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        isDelete: true,
+      },
+    });
+  }
+
+  /**
+   * 重置密码
+   * @param {ResetPasswordDto} resetPasswordDto
+   */
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    if (this.isAdminUser(resetPasswordDto.id)) {
+      throw new ApiException('系统管理员用户不允许修改！');
+    }
+
+    await this.validateUser(resetPasswordDto.id);
+
+    if (resetPasswordDto.password !== resetPasswordDto.confirmPassword)
+      throw new ApiException('两次输入密码不一致，请重试！');
+
+    const hashedPwd = await this.bcrypt.hash(resetPasswordDto.password);
+
+    await this.prisma.user.update({
+      where: {
+        id: resetPasswordDto.id,
+      },
+      data: {
+        password: hashedPwd,
       },
     });
   }

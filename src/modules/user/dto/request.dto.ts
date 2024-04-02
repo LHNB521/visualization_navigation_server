@@ -1,5 +1,5 @@
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -116,6 +116,20 @@ export class UpdateUserDto extends OmitType(PartialType(CreateUserDto), [
   'password',
   'confirmPassword',
 ]) {
+  @ApiProperty({ description: 'ID', required: true })
+  @IsNumber()
+  id: number;
+}
+
+// 启用/停用
+export class ChangeStatusDto extends PickType(CreateUserDto, ['status']) {
+  @ApiProperty({ description: 'ID', required: true })
+  @IsNumber()
+  id: number;
+}
+
+// 重置密码
+export class ResetPasswordDto extends PickType(CreateUserDto, ['password', 'confirmPassword']) {
   @ApiProperty({ description: 'ID', required: true })
   @IsNumber()
   id: number;
