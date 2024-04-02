@@ -28,8 +28,6 @@ import { PermissionModule } from './modules/permission/permisson.module';
     PermissionModule,
     RoleModule,
     DepartmentModule,
-    // // 异常日志模块
-    // ExceptionLogModule,
   ],
   providers: [
     {
