@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SexEnum, StatusEnum } from '../utils';
+import { DeptDto } from '@/modules/department/dto/response.dto';
 
 // 登录
 export class LoginResDto {
@@ -25,8 +26,8 @@ export class UserDto {
   @ApiProperty({ description: '状态', enum: StatusEnum })
   status: StatusEnum;
 
-  // @ApiProperty({ description: '部门信息' })
-  // department: DeptDto;
+  @ApiProperty({ description: '部门信息' })
+  department: DeptDto;
 
   // @ApiProperty({
   //   description: '角色信息',

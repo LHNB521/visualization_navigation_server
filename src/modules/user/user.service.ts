@@ -1,215 +1,111 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { omit } from 'lodash';
-import { RoleService } from '../role/role.service';
-
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { In, Repository, Like } from 'typeorm';
-// import { User } from './entities/user.entity';
-// import { hashSync } from 'bcryptjs';
-// import { GetUserDto, CreateUserDto } from './dto/dto';
-// import { CustomException, ErrorCode } from '@/common/exceptions/custom.exception';
-// import { Role } from '../role/role.entity';
-// import { RoleMenuService } from '../role-menu/role-menu.service';
-// import { MenuService } from '../menu/menu.service';
-// import getMenuList from '@/utils/getMenuList';
-// import { PageQueryDto } from './dto/request.dto';
-// import { UtilsService } from '../shared/utils.service';
+import { CreateUserDto } from './dto/request.dto';
+import { ApiException } from '@/common/exceptions/api-exception';
+import { BcryptService } from '../shared/bcrypt.service';
+import { UtilsService } from '../shared/utils.service';
+import { DepartmentService } from '../department/department.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    // private readonly roleService: RoleService,
-
-    // @InjectRepository(User)
-    // private readonly userRepository: Repository<User>,
-    // private readonly roleMenuService: RoleMenuService,
-    // private readonly menuService: MenuService,
-    // private readonly utils: UtilsService,
-    // @InjectRepository(Role)
-    // private roleRepo: Repository<Role>,
+    private readonly departmentService: DepartmentService,
+    private readonly bcrypt: BcryptService,
+    private readonly utils: UtilsService,
   ) {}
 
-  // // 创建用户
-  // async create(user: CreateUserDto) {
-  //   const { username } = user;
-  //   const existUser = await this.findByUsername(username);
-  //   // 判断用户是否存在
-  //   // if (existUser) {
-  //   //   throw new CustomException(ErrorCode.ERR_10001);
-  //   // }
+  /**
+   * 校验部门信息
+   * @param {number} deptId
+   */
+  async validateDept(deptId: number | string) {
+    const dept = await this.departmentService.getDeptById(deptId as number);
+    if (!dept) {
+      throw new ApiException(`部门信息不存在！`);
+    }
+    return dept;
+  }
 
-  //   const newUser = this.userRepository.create(user);
-  //   // 判断角色是否存在
-  //   // if (user.roleIds !== undefined) {
-  //   //   newUser.roles = await this.roleRepo.find({
-  //   //     where: { id: In(user.roleIds) },
-  //   //   });
-  //   // }
+  /**
+   * 校验角色信息
+   * @param {array} roleIds
+   */
+  async validateRoles(roleIds: number[]) {
+    const roles = await this.prisma.role.findMany({
+      where: {
+        id: {
+          in: roleIds,
+        },
+      },
+    });
 
-  //   // if (!newUser.profile) {
-  //   //   newUser.profile = this.profileRep.create();
-  //   // }
+    // 合法的角色Id数组
+    const validRoleIds = roles.map((item) => item.id);
+    // 非法的角色Id数组
+    const invalidRoleIds = roleIds.filter((item) => !validRoleIds.includes(item));
+    if (invalidRoleIds.length > 0) {
+      throw new ApiException(`角色信息不存在，ID: ${invalidRoleIds.join(',')}`);
+    }
+  }
 
-  //   newUser.password = hashSync(newUser.password);
-  //   await this.userRepository.save(newUser);
+  /**
+   * 创建用户
+   * @param {CreateUserDto} createUserDto
+   */
+  async createUser(createUserDto: CreateUserDto) {
+    const deptId = createUserDto.departmentId;
+    const roleIds = createUserDto.roleId;
 
-  //   return true;
-  // }
+    if (createUserDto.password !== createUserDto.confirmPassword)
+      throw new ApiException('两次输入密码不一致，请重试！');
 
-  // // 删除用户
-  // async remove(id: number) {
-  //   // 不能删除的用户
-  //   if (id == 1) throw new CustomException(ErrorCode.ERR_11006, '不能删除根用户');
+    if (await this.getUserByUsername(createUserDto.username))
+      throw new ApiException(`用户名已存在！`);
 
-  //   // 删除用户表
-  //   await this.userRepository.delete(id);
+    const userCreateInput: any = {
+      id: createUserDto.id, // 初始创建admin用户时需要用到
+      username: createUserDto.username,
+      nickname: createUserDto.nickname,
+      phoneNumber: createUserDto.phoneNumber,
+      sex: createUserDto.sex,
+      status: createUserDto.status,
+      password: '',
+    };
 
-  //   // 删除用户信息表
-  //   // await this.profileRep
-  //   //   .createQueryBuilder('profile')
-  //   //   .delete()
-  //   //   .where('userId = :id', { id })
-  //   //   .execute();
+    // 加密
+    const hashedPwd = await this.bcrypt.hash(createUserDto.password);
+    userCreateInput.password = hashedPwd;
 
-  //   return true;
-  // }
+    // 校验部门信息
+    if (!this.utils.isEmpty(deptId)) {
+      await this.validateDept(deptId);
+      userCreateInput.department = {
+        connect: {
+          id: deptId as number,
+        },
+      };
+    }
 
-  // // 查询所有用户信息
-  // findAll() {
-  //   const data = this.userRepository.find();
-  //   return data;
-  // }
+    // 校验角色信息
+    if (!this.utils.isEmpty(roleIds) && roleIds.length !== 0) {
+      await this.validateRoles(roleIds);
 
-  // // 查询用户
-  // async getUserListByPage({
-  //   skip,
-  //   take,
-  //   username = '',
-  //   nickname = '',
-  //   status = '',
-  //   departmentId = '',
-  //   roleId = '',
-  // }: PageQueryDto = {}) {
-  //   // 查询参数
-  //   const whereQuery = {
-  //     AND: [
-  //       {
-  //         isDelete: false,
-  //       },
-  //       {
-  //         username: this.utils.isEmpty(username) ? undefined : { contains: username },
-  //       },
-  //       {
-  //         nickname: this.utils.isEmpty(nickname) ? undefined : { contains: nickname },
-  //       },
-  //       {
-  //         status: this.utils.isEmpty(status) ? undefined : parseInt(status),
-  //       },
-  //       {
-  //         userRole: this.utils.isEmpty(roleId) ? undefined : { some: { roleId: parseInt(roleId) } },
-  //       },
-  //     ],
-  //   };
+      userCreateInput.userRole = {
+        createMany: {
+          data: roleIds.map((item) => {
+            return {
+              roleId: item,
+            };
+          }),
+        },
+      };
+    }
+    await this.prisma.user.create({
+      data: userCreateInput,
+    });
+  }
 
-  //   // 部门查询参数
-  //   // const deptQuery: any = {
-  //   //   departmentId: undefined,
-  //   // };
-  //   // if (!this.utils.isEmpty(departmentId)) {
-  //   //   // 获取所有部门
-  //   //   const parseDeptId = parseInt(departmentId);
-  //   //   const allDeptList = await this.departmentService.getDeptList();
-  //   //   // 获取当前部门所有子孙部门id
-  //   //   const childDepartmentIds = [parseDeptId, ...findChildDepartments(parseDeptId, allDeptList)];
-  //   //   deptQuery.departmentId = {
-  //   //     in: childDepartmentIds,
-  //   //   };
-  //   // }
-
-  //   // whereQuery.AND.push(deptQuery);
-
-  //   // const users = await this.prisma.user.findMany({
-  //   //   take,
-  //   //   skip,
-  //   //   where: whereQuery,
-  //   //   include: {
-  //   //     department: true,
-  //   //     userRole: {
-  //   //       include: {
-  //   //         role: true,
-  //   //       },
-  //   //     },
-  //   //   },
-  //   //   orderBy: [
-  //   //     {
-  //   //       createTime: 'desc',
-  //   //     },
-  //   //   ],
-  //   // });
-
-  //   // const list = users.map((item) => {
-  //   //   let user: any = Object.assign({}, item);
-  //   //   user.roles = (user.userRole || []).map((ur) => ur.role);
-  //   //   user = omit(user, ['isDelete', 'userRole', 'password']);
-  //   //   return user;
-  //   // });
-
-  //   // const count = await this.prisma.user.count({ where: whereQuery });
-  //   return {
-  //     // list,
-  //     // total: count,
-  //   };
-  // }
-
-  // // 根据用户id查询用户详情
-  // async findUserDetail(id: number) {
-  //   const data = await this.userRepository
-  //     .createQueryBuilder('user')
-  //     .leftJoin('user.userRole', 'role')
-  //     .addSelect(['role.id', 'role.name', 'role.code'])
-  //     .where('user.id=:id', { id })
-  //     .getOne();
-  //   const roleId = data.userRole.id;
-  //   const menuIds = await this.roleMenuService.findIdByRoleId(roleId);
-  //   const menu = getMenuList(await this.menuService.getMenuByIds(menuIds));
-  //   data.menus = menu;
-  //   return { userinfo: data };
-  // }
-
-  // // 根据用户名查询用户信息
-  // async findByUsername(username: string) {
-  //   return this.userRepository.findOne({
-  //     where: { username },
-  //     select: ['id', 'username', 'password', 'enable'],
-  //     relations: {
-  //       userRole: true,
-  //     },
-  //   });
-  // }
-
-  // // 是否存在用户
-  // async isExistUser(username: string) {
-  //   const res = await this.userRepository
-  //     .createQueryBuilder('userinfo')
-  //     .select()
-  //     .addSelect('userinfo.password')
-  //     .leftJoin('userinfo.userRole', 'role')
-  //     .addSelect(['role.id', 'role.code', 'role.name'])
-  //     .where('userinfo.username = :username', { username })
-  //     .getOne();
-  //   return res;
-  // }
-
-  // // 修改密码
-  // async resetPassword(id: number, password: string) {
-  //   const user = await this.userRepository.findOne({ where: { id } });
-  //   user.password = hashSync(password);
-  //   await this.userRepository.save(user);
-  //   return true;
-  // }
-  // ---------------------
   /**
    * 通过id获取用户详细信息
    * @param {Number} id

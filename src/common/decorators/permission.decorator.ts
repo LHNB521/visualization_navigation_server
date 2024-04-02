@@ -26,6 +26,5 @@ export const Permission = (
   } else if (Array.isArray(permissions)) {
     permissionData.permissions = permissions;
   }
-
   return SetMetadata(PERMISSION_KEY, permissionData);
 };
