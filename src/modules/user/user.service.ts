@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/request.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/request.dto';
 import { ApiException } from '@/common/exceptions/api-exception';
 import { BcryptService } from '../shared/bcrypt.service';
 import { UtilsService } from '../shared/utils.service';
 import { DepartmentService } from '../department/department.service';
+import { omit } from 'lodash';
+import { ADMIN_USER_ID } from '@/common/constants/admin.constant';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -14,6 +17,26 @@ export class UserService {
     private readonly bcrypt: BcryptService,
     private readonly utils: UtilsService,
   ) {}
+
+  /**
+   * 是否是系统管理员用户
+   * @param {number} id
+   */
+  isAdminUser(id: number) {
+    return id === ADMIN_USER_ID;
+  }
+
+  /**
+   * 校验用户
+   * @param {number} id
+   */
+  async validateUser(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new ApiException('用户不存在！');
+    }
+    return user;
+  }
 
   /**
    * 校验部门信息
@@ -107,6 +130,73 @@ export class UserService {
   }
 
   /**
+   * 修改用户
+   * @param {UpdateUserDto} updateUserDto
+   */
+  async updateUser(updateUserDto: UpdateUserDto) {
+    if (this.isAdminUser(updateUserDto.id)) {
+      throw new ApiException('系统管理员用户不允许修改！');
+    }
+
+    const deptId = updateUserDto.departmentId;
+    const roleIds = updateUserDto.roleId;
+
+    await this.validateUser(updateUserDto.id);
+
+    const userUpdateInput: Prisma.UserUpdateInput = {
+      username: updateUserDto.username,
+      nickname: updateUserDto.nickname,
+      phoneNumber: updateUserDto.phoneNumber,
+      sex: updateUserDto.sex,
+      status: updateUserDto.status,
+    };
+
+    // 校验部门信息
+    if (!this.utils.isEmpty(deptId)) {
+      await this.validateDept(deptId);
+
+      userUpdateInput.department = {
+        connect: {
+          id: deptId as number,
+        },
+      };
+    } else if (deptId === '') {
+      userUpdateInput.department = {
+        disconnect: true,
+      };
+    }
+
+    // 校验角色信息
+    if (!this.utils.isEmpty(roleIds) && Array.isArray(roleIds)) {
+      // 清空角色关联数据
+      userUpdateInput.userRole = {
+        deleteMany: {
+          userId: updateUserDto.id,
+        },
+      };
+
+      if (roleIds.length !== 0) {
+        await this.validateRoles(roleIds);
+
+        userUpdateInput.userRole.createMany = {
+          data: roleIds.map((item) => {
+            return {
+              roleId: item,
+            };
+          }),
+        };
+      }
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: updateUserDto.id,
+      },
+      data: userUpdateInput,
+    });
+  }
+
+  /**
    * 通过id获取用户详细信息
    * @param {Number} id
    */
@@ -115,18 +205,18 @@ export class UserService {
       where: {
         id,
       },
-      // include: {
-      //   department: true,
-      //   userRole: {
-      //     include: {
-      //       role: true,
-      //     },
-      //   },
-      // },
+      include: {
+        department: true,
+        userRole: {
+          include: {
+            role: true,
+          },
+        },
+      },
     });
-    const detail: any = Object.assign({}, user);
-    // detail.roles = (user.userRole || []).map((ur: any) => ur.role);
-    // detail = omit(detail, ['isDelete', 'userRole', 'password']);
+    let detail: any = Object.assign({}, user);
+    detail.roles = (user.userRole || []).map((ur: any) => ur.role);
+    detail = omit(detail, ['isDelete', 'userRole', 'password']);
     return detail;
   }
   /**

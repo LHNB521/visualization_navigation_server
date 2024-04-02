@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ApiResultResponse } from 'src/common/decorators/api-result-response.decorator';
 import { CurrentUserDto, UserDto } from './dto/response.dto';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { PaginationPipe } from '@/common/pipes/pagination.pipe';
-import { CreateUserDto, PageQueryDto } from './dto/request.dto';
+import { CreateUserDto, PageQueryDto, UpdateUserDto } from './dto/request.dto';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -33,6 +33,7 @@ export class UserController {
   async getUserDetailById(@Param('id') id: number): Promise<UserDto> {
     return await this.userService.getUserDetailById(id);
   }
+
   /**
    * 创建用户
    * @param {CreateUserDto} createUserDto
@@ -44,6 +45,19 @@ export class UserController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     await this.userService.createUser(createUserDto);
   }
+
+  /**
+   * 编辑用户
+   * @param {UpdateUserDto} updateUserDto
+   */
+  @ApiOperation({ summary: '编辑用户' })
+  @ApiResultResponse()
+  @Put()
+  @Permission('system:user:edit')
+  async updateUser(@Body() updateUserDto: UpdateUserDto) {
+    await this.userService.updateUser(updateUserDto);
+  }
+
   /**
    * 分页获取用户列表
    */

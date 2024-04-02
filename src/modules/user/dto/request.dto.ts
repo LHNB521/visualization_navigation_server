@@ -1,5 +1,5 @@
 import { PaginationDto } from '@/common/dtos/pagination.dto';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -109,4 +109,14 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
+}
+
+// 编辑用户
+export class UpdateUserDto extends OmitType(PartialType(CreateUserDto), [
+  'password',
+  'confirmPassword',
+]) {
+  @ApiProperty({ description: 'ID', required: true })
+  @IsNumber()
+  id: number;
 }
