@@ -18,7 +18,8 @@ export class BaseController {
   @Post('/login')
   @Public()
   @UseGuards(LocalAuthGuard)
-  async login(@Req() req) {
+  async login(@Req() req: any) {
+    console.log(req.user);
     return this.baseService.login(req.user);
   }
 

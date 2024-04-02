@@ -39,7 +39,7 @@ export class AuthService {
    * @param {string} password
    * @return {*}
    */
-  async validateUser(username: string, password: string) {
+  async validateUser(username: string, password: string): Promise<any> {
     const user = await this.userService.getUserByUsername(username);
     if (!user) throw new ApiException('用户不存在！');
     if (!(await this.bctyptService.compare(password, user.password)))
@@ -61,12 +61,7 @@ export class AuthService {
    */
   generateToken(payload: { userId: number }) {
     const token = this.jwtService.sign(payload);
-
-    // !! cache-manager-redis-store@3.0.1版本redisStore的set方法第三个参数是Object类型，而cacheManager@5.2.5的set方法第三个参数ttl是number类型
-    this.redisSerivce.set(`${USER_TOKEN_KEY}:${payload.userId}`, token, {
-      ttl: 60 * 60 * 24 * 1000, // 有效期设置为24小时
-    });
-
+    this.redisSerivce.set(`${USER_TOKEN_KEY}:${payload.userId}`, token, 60 * 60 * 24 * 1000);
     return {
       token,
     };

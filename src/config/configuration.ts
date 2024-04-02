@@ -33,7 +33,7 @@ export default () => {
     redis: {
       REDIS_HOST: REDIS_HOST || '192.168.1.2', // IP
       REDIS_PORT: REDIS_PORT || 6379, // 端口
-      REDIS_DB: REDIS_DB || 'default', // 数据库
+      REDIS_DB: REDIS_DB || 15, // 数据库
       REDIS_PASSWORD: REDIS_PASSWORD || '123456', // 密码
     },
     JWT_SECRET: JWT_SECRET,
