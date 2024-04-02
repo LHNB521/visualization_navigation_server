@@ -21,7 +21,7 @@ export class AuthService {
    * @param {string} token
    * @return {boolean}
    */
-  async validateToken(userId: number, token: any) {
+  async validateToken(userId: number, token: any): Promise<boolean> {
     const user = this.userService.getUserById(userId);
     if (!user) {
       throw new ApiException('用户认证失败！', 401);

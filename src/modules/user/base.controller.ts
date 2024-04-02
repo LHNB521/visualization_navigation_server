@@ -19,14 +19,13 @@ export class BaseController {
   @Public()
   @UseGuards(LocalAuthGuard)
   async login(@Req() req: any) {
-    console.log(req.user);
     return this.baseService.login(req.user);
   }
 
   @ApiOperation({ summary: '登出' })
   @ApiResultResponse()
   @Post('/logout')
-  async logout(@Req() req) {
+  async logout(@Req() req: any) {
     const { userId } = req.user;
     return this.baseService.logout(userId);
   }
