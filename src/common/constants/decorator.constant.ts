@@ -1,6 +1,3 @@
-// 超级管理员
-export const ROLES_KEY = 'roles';
-
 // 保持原数据返回，不使用统一json格式包裹
 export const KEEP_KEY = 'common:keep';
 
