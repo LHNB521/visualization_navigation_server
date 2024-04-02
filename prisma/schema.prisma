@@ -1,0 +1,44 @@
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 用户
+model User {
+  id          Int     @id @default(autoincrement())
+  // 用户名
+  username    String  @unique @db.VarChar(255)
+  // 密码
+  password    String  @db.VarChar(255)
+  // 姓名
+  nickname    String  @db.VarChar(20)
+  // 手机号码
+  phoneNumber String? @map("phone_number") @db.VarChar(20)
+  // 性别 1=>男 2=>女 3=>未知
+  sex         Int?    @default(3)
+  // 状态 1=>正常 2=>停用
+  status      Int     @default(1)
+
+  // 部门
+  departmentId Int?        @map("department_id")
+//  department   Department? @relation(fields: [departmentId], references: [id])
+
+  // 创建时间
+  createTime DateTime? @default(now()) @map("create_time")
+  // 编辑时间
+  updateTime DateTime? @updatedAt() @map("update_time")
+
+  // 是否逻辑删除
+  isDelete Boolean @default(false) @map("is_delete")
+
+//  userRole UserRole[]
+
+//  @@index([departmentId])
+  @@map("sys_user")
+}
+

@@ -31,13 +31,15 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   create(@Body() creteRoleDto: CreateRoleDto) {
-    return this.roleService.create(creteRoleDto);
+    // return this.roleService.create(creteRoleDto);
+
+    return;
   }
 
   // 获取角色列表
   @Get('list')
   findAll(@Query() query: GetRolesDto) {
-    return this.roleService.findAll(query);
+    // return this.roleService.findAll(query);
   }
 
   // 根据id修改角色
@@ -45,7 +47,7 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(+id, updateRoleDto);
+    // return this.roleService.update(+id, updateRoleDto);
   }
 
   // 根据id删除角色
@@ -53,7 +55,8 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   delete(@Param('id') id: string) {
-    return this.roleService.delete(+id);
+    // return this.roleService.delete(+id);
+    return;
   }
 
   // 给角色分配用户
@@ -61,27 +64,27 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   addRoleUsers(@Param('roleId') roleId: string, @Body() dto: AddRoleUsersDto) {
-    return this.roleService.addRoleUsers(+roleId, dto);
+    // return this.roleService.addRoleUsers(+roleId, dto);
   }
   // 取消用户角色
   @Patch('users/remove/:roleId')
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   removeRoleUsers(@Param('roleId') roleId: string, @Body() dto: AddRoleUsersDto) {
-    return this.roleService.removeRoleUsers(+roleId, dto);
+    // return this.roleService.removeRoleUsers(+roleId, dto);
   }
 
   // 根据id获取角色
   @Get('findeOne/:id')
   @Roles('SUPER_ADMIN')
   findOne(@Param('id') id: string) {
-    return this.roleService.findOne(+id);
+    // return this.roleService.findOne(+id);
   }
 
   // 获取角色权限
   @Get('permissions')
   findRolePermissions(@Query('id') id: number) {
-    return this.roleService.findRolePermissions(+id);
+    // return this.roleService.findRolePermissions(+id);
   }
 
   // 添加角色权限
@@ -89,12 +92,12 @@ export class RoleController {
   @UseGuards(PreviewGuard)
   @Roles('SUPER_ADMIN')
   addRolePermissions(@Body() dto: AddRolePermissionsDto) {
-    return this.roleService.addRolePermissions(dto);
+    // return this.roleService.addRolePermissions(dto);
   }
 
   // 获取角色权限树
   @Get('permissions/tree')
   findRolePermissionsTree(@Request() req: any) {
-    return this.roleService.findRolePermissionsTree(req.user.currentRoleCode);
+    // return this.roleService.findRolePermissionsTree(req.user.currentRoleCode);
   }
 }

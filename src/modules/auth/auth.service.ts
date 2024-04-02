@@ -25,33 +25,33 @@ export class AuthService {
   // 登录
   async login(username: string, password: string) {
     // 判断用户是否存在
-    const userinfo: any = await this.userService.isExistUser(username);
+    // const userinfo: any = await this.userService.isExistUser(username);
     // 判断密码是否一致
-    const flag = await compare(password, userinfo.password);
-    if (userinfo && flag) {
-      // 获取菜单
-      const { menu, resource } = await this.getPermission(userinfo.userRole.id);
-      const roleId = userinfo.userRole.id;
-      const permission = {
-        roleId,
-        resource,
-      };
-      this.redisService.setValue(`user:${userinfo.id}`, JSON.stringify(permission));
-      // 生成token此时请求就带有token了
-      const token = this.jwtService.sign({
-        username: userinfo.username,
-        userId: userinfo.id,
-        currentRoleCode: userinfo?.userRole?.code,
-      });
-      this.redisService.setValue(
-        `user_access_token:${userinfo.id}`,
-        token,
-        ACCESS_TOKEN_EXPIRATION_TIME,
-      );
-      delete userinfo.password;
-      userinfo.menus = menu;
-      return { userinfo, token };
-    }
+    // const flag = await compare(password, userinfo.password);
+    // if (userinfo && flag) {
+    //   // 获取菜单
+    //   const { menu, resource } = await this.getPermission(userinfo.userRole.id);
+    //   const roleId = userinfo.userRole.id;
+    //   const permission = {
+    //     roleId,
+    //     resource,
+    //   };
+    //   this.redisService.setValue(`user:${userinfo.id}`, JSON.stringify(permission));
+    //   // 生成token此时请求就带有token了
+    //   const token = this.jwtService.sign({
+    //     username: userinfo.username,
+    //     userId: userinfo.id,
+    //     currentRoleCode: userinfo?.userRole?.code,
+    //   });
+    //   this.redisService.setValue(
+    //     `user_access_token:${userinfo.id}`,
+    //     token,
+    //     ACCESS_TOKEN_EXPIRATION_TIME,
+    //   );
+    //   delete userinfo.password;
+    //   userinfo.menus = menu;
+    //   return { userinfo, token };
+    // }
     throw new loginError('账号或密码错误');
   }
 
@@ -68,7 +68,7 @@ export class AuthService {
   // 登出
   logout(userId: number) {
     if (userId) {
-      this.redisService.delValue(`user_access_token:${userId}`);
+      // this.redisService.delValue(`user_access_token:${userId}`);
       return true;
     }
     return false;
@@ -81,24 +81,24 @@ export class AuthService {
    * @return {boolean}
    */
   async validateToken(payload: any, token: string): Promise<boolean> {
-    const user = this.userService.isExistUser(payload.userId);
-    if (!user) {
-      throw new tokenError('用户认证失败！');
-    }
-    const cacheToken = await this.redisService.getValue(`user_access_token:${payload.userId}`);
-    if (!cacheToken || token !== cacheToken) {
-      throw new tokenError('登录状态已过期！');
-    }
+    // const user = this.userService.isExistUser(payload.userId);
+    // if (!user) {
+    //   throw new tokenError('用户认证失败！');
+    // }
+    // const cacheToken = await this.redisService.getValue(`user_access_token:${payload.userId}`);
+    // if (!cacheToken || token !== cacheToken) {
+    //   throw new tokenError('登录状态已过期！');
+    // }
     return true;
   }
 
   // 密码验证用户
   async validateUser(username: string, password: string) {
-    const user: any = await this.userService.findByUsername(username);
-    if (user && compareSync(password, user.password)) {
-      const { password, ...result } = user;
-      return result;
-    }
+    // const user: any = await this.userService.findByUsername(username);
+    // if (user && compareSync(password, user.password)) {
+    //   const { password, ...result } = user;
+    //   return result;
+    // }
     return null;
   }
 

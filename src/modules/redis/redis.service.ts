@@ -1,49 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class RedisService {
-  private readonly redisClient: Redis;
-
-  constructor(private configService: ConfigService) {
-    this.redisClient = new Redis({
-      host: this.configService.get('REDIS_HOST'), // Redis 服务器的端口
-      port: this.configService.get('REDIS_PORT'), // Redis 服务器的主机名
-      password: this.configService.get('REDIS_PASSWORD'),
-    });
+  constructor(
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+  ) {}
+  async get(key: string): Promise<string> {
+    return await this.cacheManager.get(key);
   }
-
-  setValue(key: string, value: string, time: number = 2 * 60 * 60 * 24) {
-    return this.redisClient.setex(key, time, value);
+  async set(key: string, value: string, ttl?: any) {
+    await this.cacheManager.set(key, value, ttl);
   }
-
-  getValue(key: string) {
-    return this.redisClient.get(key);
-  }
-
-  setWithExpiry(key: string, value: string, time: number) {
-    return this.redisClient.setex(key, time, value);
-  }
-
-  async getAllKeys(pattern: string) {
-    const keys = await this.redisClient.keys(pattern);
-    return keys;
-  }
-
-  delValue(key: string) {
-    return this.redisClient.del(key);
-  }
-
-  async setHashField(key: string, field: string, value: string) {
-    return this.redisClient.hset(key, field, value);
-  }
-
-  getHashField(key: string, field: string) {
-    return this.redisClient.hget(key, field);
-  }
-
-  getAllHashFields(key: string) {
-    return this.redisClient.hgetall(key);
+  async del(key: string) {
+    await this.cacheManager.del(key);
   }
 }

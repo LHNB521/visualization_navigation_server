@@ -23,23 +23,23 @@ export class AuthController {
   @Post('/login')
   @Public()
   async login(@Body() userInfo: User | any) {
-    const { username, password, captcha } = userInfo;
-    const arrVal = [];
-    const keys = await this.redisService.getAllKeys('vis_captcha:*');
-    for (let i = 0; i < keys.length; i++) {
-      const val = await this.redisService.getValue(keys[i]);
-      arrVal.push(val);
-    }
-    let flag = false;
-    for (let i = 0; i < arrVal.length; i++) {
-      if (captcha?.toLocaleLowerCase() == arrVal[i].toLocaleLowerCase()) {
-        flag = true;
-        break;
-      }
-    }
-    if (!flag) throw new registerError('验证码有误');
-    const data = await this.authService.login(username, password);
-    return new Result(data);
+    // const { username, password, captcha } = userInfo;
+    // const arrVal = [];
+    // const keys = await this.redisService.getAllKeys('vis_captcha:*');
+    // for (let i = 0; i < keys.length; i++) {
+    //   const val = await this.redisService.getValue(keys[i]);
+    //   arrVal.push(val);
+    // }
+    // let flag = false;
+    // for (let i = 0; i < arrVal.length; i++) {
+    //   if (captcha?.toLocaleLowerCase() == arrVal[i].toLocaleLowerCase()) {
+    //     flag = true;
+    //     break;
+    //   }
+    // }
+    // if (!flag) throw new registerError('验证码有误');
+    // const data = await this.authService.login(username, password);
+    // return new Result(data);
   }
 
   // 获取验证码
@@ -59,7 +59,7 @@ export class AuthController {
       mathOperator: '+',
     });
     req.session.captcha = captcha.text; // 存储验证码记录到session
-    this.redisService.setValue(`vis_captcha:${captcha.text}`, captcha.text, 60);
+    // this.redisService.setValue(`vis_captcha:${captcha.text}`, captcha.text, 60);
     res.set('Access-Control-Allow-Origin', '*'); // 允许所有域名进行跨域请求
     res.set('Cross-Origin-Opener-Policy', 'cross-origin');
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -84,7 +84,7 @@ export class AuthController {
       throw new CustomException(ErrorCode.ERR_10004);
     }
     // 修改密码
-    await this.userService.resetPassword(req.user.userId, body.newPassword);
+    // await this.userService.resetPassword(req.user.userId, body.newPassword);
     // 修改密码后退出登录
     this.authService.logout(req.user.userId);
     return true;

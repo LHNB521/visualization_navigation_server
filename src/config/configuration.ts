@@ -1,6 +1,5 @@
 export default () => {
   const {
-    REDIS_URL,
     APP_PORT,
     DB_TYPE,
     DB_HOST,
@@ -10,6 +9,10 @@ export default () => {
     DB_PASSWORD,
     DB_SYNC,
     JWT_SECRET,
+    REDIS_HOST,
+    REDIS_PORT,
+    REDIS_DB,
+    REDIS_PASSWORD,
   } = process.env;
   return {
     // 基础相关
@@ -28,7 +31,10 @@ export default () => {
     },
     // redis
     redis: {
-      REDIS_URL: REDIS_URL,
+      REDIS_HOST: REDIS_HOST || '192.168.1.2', // IP
+      REDIS_PORT: REDIS_PORT || 6379, // 端口
+      REDIS_DB: REDIS_DB || 'default', // 数据库
+      REDIS_PASSWORD: REDIS_PASSWORD || '123456', // 密码
     },
     JWT_SECRET: JWT_SECRET,
   };
