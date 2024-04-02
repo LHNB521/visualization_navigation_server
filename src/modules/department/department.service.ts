@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ListQueryDto } from './dto/request.dto';
+import { CreateDeptDto, ListQueryDto, UpdateDeptDto } from './dto/request.dto';
 import { UtilsService } from '../shared/utils.service';
+import { ApiException } from '@/common/exceptions/api-exception';
 
 @Injectable()
 export class DepartmentService {
@@ -22,6 +23,19 @@ export class DepartmentService {
   }
 
   /**
+   * 通过名称和父部门id获取部门信息
+   * @param {string} name
+   * @param {number|undefined|null} parentId
+   */
+  async getDeptByNameAndParentId(name: string, parentId?: number) {
+    return this.prisma.department.findFirst({
+      where: {
+        AND: [{ name }, { parentId }, { isDelete: false }],
+      },
+    });
+  }
+
+  /**
    * 获取部门列表
    * @param {ListQueryDto} query
    */
@@ -36,6 +50,80 @@ export class DepartmentService {
         ],
       },
       orderBy: [{ sort: 'asc' }, { updateTime: 'desc' }],
+    });
+  }
+
+  /**
+   * 获取除某个部门以及其所有子孙部门的列表
+   * @param {number} id
+   */
+  async getDeptListExclude(id: number) {
+    const deptList = await this.getDeptList();
+    return this.utils.arrayToTree(deptList || [], { excludeId: id });
+  }
+
+  /**
+   * 创建部门
+   */
+  async createDept(createDeptDto: CreateDeptDto) {
+    // 同一个父部门下不能有重名的子部门
+    const dept = await this.getDeptByNameAndParentId(createDeptDto.name, createDeptDto.parentId);
+    if (dept) {
+      throw new ApiException('部门名称已存在！');
+    }
+
+    // 校验父部门
+    const parentDept = await this.getDeptById(createDeptDto.parentId);
+    if (createDeptDto.parentId !== 0 && !parentDept) {
+      throw new ApiException('父部门不存在！');
+    }
+
+    await this.prisma.department.create({
+      data: createDeptDto,
+    });
+  }
+
+  /**
+   * 编辑部门
+   */
+  async updateDept(updateDeptDto: UpdateDeptDto) {
+    const dept = await this.getDeptById(updateDeptDto.id);
+    if (!dept) {
+      throw new ApiException('部门信息不存在');
+    }
+    this.prisma.department.update({
+      where: { id: updateDeptDto.id },
+      data: updateDeptDto,
+    });
+  }
+
+  /**
+   * 删除部门
+   * @param {Number} id
+   */
+  async deleteDept(id: number) {
+    const dept = await this.prisma.department.findUnique({
+      where: { id },
+    });
+    if (!dept) {
+      throw new ApiException('部门不存在！');
+    }
+
+    // 校验当前部门下是否有子部门
+    const childs = await this.prisma.department.findMany({
+      where: { parentId: id },
+    });
+    if (childs.length > 0) {
+      throw new ApiException('当前部门下存在子部门，不可删除！');
+    }
+
+    await this.prisma.department.update({
+      where: {
+        id,
+      },
+      data: {
+        isDelete: true,
+      },
     });
   }
 }
