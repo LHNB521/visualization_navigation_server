@@ -1,11 +1,29 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
-import { ApiOperation, ApiOkResponse, ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UsePipes,
+} from '@nestjs/common';
+import { ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { ApiResultResponse } from 'src/common/decorators/api-result-response.decorator';
 import { CurrentUserDto, UserDto } from './dto/response.dto';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { PaginationPipe } from '@/common/pipes/pagination.pipe';
-import { ChangeStatusDto, CreateUserDto, PageQueryDto, ResetPasswordDto, UpdateUserDto } from './dto/request.dto';
+import {
+  ChangeStatusDto,
+  CreateUserDto,
+  PageQueryDto,
+  ResetPasswordDto,
+  UpdateUserDto,
+} from './dto/request.dto';
+import { PaginatedDto } from '@/common/dtos/paginated.dto';
 
 @ApiTags('用户管理')
 @Controller('user')
@@ -20,6 +38,19 @@ export class UserController {
   @Get('/info')
   async getCurrentUserInfo(@Req() req: any): Promise<CurrentUserDto> {
     return await this.userService.getCurrentUserInfo(req.user.userId);
+  }
+
+  /**
+   * 分页获取用户列表
+   */
+  @ApiOperation({ summary: '分页获取用户列表' })
+  @ApiResultResponse(UserDto, { isPage: true })
+  @Get('/list')
+  @Permission('system:user:query')
+  @UsePipes(PaginationPipe)
+  async getUserListByPage(@Query() query: PageQueryDto): Promise<PaginatedDto<UserDto>> {
+    console.log(query);
+    return await this.userService.getUserListByPage(query);
   }
 
   /**
@@ -94,16 +125,4 @@ export class UserController {
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     await this.userService.resetPassword(resetPasswordDto);
   }
-
-  /**
-   * 分页获取用户列表
-   */
-  // @ApiOperation({ summary: '分页获取用户列表' })
-  // @ApiResultResponse(UserDto, { isPage: true })
-  // @Get('/list')
-  // @Permission('system:user:query')
-  // @UsePipes(PaginationPipe)
-  // async getUserListByPage(@Query() query: PageQueryDto): Promise<PaginatedDto<UserDto>> {
-  //   return await this.userService.getUserListByPage(query);
-  // }
 }

@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChangeStatusDto, CreateUserDto, ResetPasswordDto, UpdateUserDto } from './dto/request.dto';
+import {
+  ChangeStatusDto,
+  CreateUserDto,
+  PageQueryDto,
+  ResetPasswordDto,
+  UpdateUserDto,
+} from './dto/request.dto';
 import { ApiException } from '@/common/exceptions/api-exception';
 import { BcryptService } from '../shared/bcrypt.service';
 import { UtilsService } from '../shared/utils.service';
@@ -8,14 +14,37 @@ import { DepartmentService } from '../department/department.service';
 import { omit } from 'lodash';
 import { ADMIN_USER_ID } from '@/common/constants/admin.constant';
 import { Prisma } from '@prisma/client';
+import { RoleService } from '../role/role.service';
+import { USER_PERMISSION_KEY } from '@/common/constants/redis.contant';
+import { RedisService } from '../redis/redis.service';
+
+/**
+ * 通过部门id找寻所有子孙部门id
+ * @param {number} deptId
+ * @param {array} departments
+ * @return {array}
+ */
+function findChildDepartments(deptId: number, departments: string | any[]): Array<any> {
+  let result = [];
+  for (let i = 0; i < departments.length; i++) {
+    const dept = departments[i];
+    if (dept.parentId === deptId) {
+      result.push(dept.id);
+      result = result.concat(findChildDepartments(dept.id, departments));
+    }
+  }
+  return result;
+}
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly departmentService: DepartmentService,
+    private readonly roleService: RoleService,
     private readonly bcrypt: BcryptService,
     private readonly utils: UtilsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
@@ -24,6 +53,29 @@ export class UserService {
    */
   isAdminUser(id: number) {
     return id === ADMIN_USER_ID;
+  }
+
+  /**
+   * 获取当前用户信息
+   * @param {Number} id 用户id
+   */
+  async getCurrentUserInfo(id: number) {
+    const userInfo = await this.getUserDetailById(id);
+
+    const roleIds = userInfo.roles.map((item: any) => item.id);
+
+    const permissions = await this.roleService.getPermissionsByRoleIds(roleIds || []);
+
+    const permissionCodes = permissions
+      .filter((item) => !this.utils.isEmpty(item.code))
+      .map((item) => item.code);
+
+    userInfo.permissions = permissionCodes;
+
+    // 缓存
+    this.redis.set(`${USER_PERMISSION_KEY}:${id}`, JSON.stringify(permissionCodes));
+
+    return userInfo;
   }
 
   /**
@@ -197,6 +249,92 @@ export class UserService {
   }
 
   /**
+   * 获取用户列表
+   */
+  async getUserListByPage({
+    skip,
+    take,
+    username = '',
+    nickname = '',
+    status = '',
+    departmentId = '',
+    roleId = '',
+  }: PageQueryDto = {}) {
+    // 查询参数
+    const whereQuery = {
+      AND: [
+        {
+          isDelete: false,
+        },
+        {
+          username: this.utils.isEmpty(username) ? undefined : { contains: username },
+        },
+        {
+          nickname: this.utils.isEmpty(nickname) ? undefined : { contains: nickname },
+        },
+        {
+          status: this.utils.isEmpty(status) ? undefined : parseInt(status),
+        },
+        {
+          userRole: this.utils.isEmpty(roleId) ? undefined : { some: { roleId: parseInt(roleId) } },
+        },
+      ],
+    };
+
+    // 部门查询参数
+    const deptQuery: any = {
+      departmentId: undefined,
+    };
+    if (!this.utils.isEmpty(departmentId)) {
+      // 获取所有部门
+      const parseDeptId = parseInt(departmentId);
+      const allDeptList = await this.departmentService.getDeptList();
+      // 获取当前部门所有子孙部门id
+      const childDepartmentIds = [parseDeptId, ...findChildDepartments(parseDeptId, allDeptList)];
+      deptQuery.departmentId = {
+        in: childDepartmentIds,
+      };
+    }
+
+    whereQuery.AND.push(deptQuery);
+    console.log(whereQuery);
+    const users = await this.prisma.user.findMany({
+      take,
+      skip,
+      where: whereQuery,
+      include: {
+        department: true,
+        userRole: {
+          include: {
+            role: true,
+          },
+        },
+      },
+      orderBy: [
+        {
+          createTime: 'desc',
+        },
+      ],
+    });
+    console.log(users);
+
+    const list = users.map((item) => {
+      let user: any = Object.assign({}, item);
+      user.roles = (user.userRole || []).map((ur: any) => ur.role);
+
+      user = omit(user, ['isDelete', 'userRole', 'password']);
+
+      return user;
+    });
+
+    const count = await this.prisma.user.count({ where: whereQuery });
+    return {
+      list,
+      total: count,
+    };
+  }
+
+  /**
    * 通过id获取用户详细信息
    * @param {Number} id
    */
@@ -218,28 +356,6 @@ export class UserService {
     detail.roles = (user.userRole || []).map((ur: any) => ur.role);
     detail = omit(detail, ['isDelete', 'userRole', 'password']);
     return detail;
-  }
-  /**
-   * 获取当前用户信息
-   * @param {Number} id 用户id
-   */
-  async getCurrentUserInfo(id: number) {
-    const userInfo = await this.getUserDetailById(id);
-
-    // const roleIds = userInfo.roles.map((item) => item.id);
-
-    // const permissions = await this.roleService.getPermissionsByRoleIds(roleIds || []);
-
-    // const permissionCodes = permissions
-    //   .filter((item) => !this.utils.isEmpty(item.code))
-    //   .map((item) => item.code);
-
-    // userInfo.permissions = permissionCodes;
-
-    // // 缓存
-    // this.redis.set(`${USER_PERMISSION_KEY}:${id}`, JSON.stringify(permissionCodes));
-
-    return userInfo;
   }
 
   /**
